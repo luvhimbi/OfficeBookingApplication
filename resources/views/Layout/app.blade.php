@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>@yield('title') - WorkSpace Hub</title>
 
-    {{-- Bootswatch Lux Theme --}}
+    {{-- Bootswatch Zephyr Theme --}}
     <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/zephyr/bootstrap.min.css" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -23,7 +23,6 @@
             background-color: #f8f9fa;
         }
 
-        /* Top Navbar */
         .navbar {
             background-color: #212529 !important;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -63,7 +62,6 @@
             color: #fff;
         }
 
-        /* Main content */
         main {
             padding: 2rem;
             min-height: calc(100vh - 120px);
@@ -76,7 +74,6 @@
             font-size: 14px;
         }
 
-        /* Mobile adjustments */
         @media (max-width: 992px) {
             .navbar-nav .dropdown-menu {
                 background-color: #2c3034;
@@ -130,6 +127,17 @@
                         <li class="nav-item">
                             <a href="{{ route('bookings.index') }}" class="nav-link @if(request()->is('bookings')) active @endif"><i class="bi bi-calendar-check"></i> Bookings</a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('notifications.index') }}" class="nav-link">
+                                <i class="bi bi-bell"></i> Notifications
+                                @php
+                                    $unreadCount = \App\Models\Notification::where('user_id', auth()->id())->where('is_read', false)->count();
+                                @endphp
+                                @if($unreadCount > 0)
+                                    <span class="badge bg-danger">{{ $unreadCount }}</span>
+                                @endif
+                            </a>
+                        </li>
                     @elseif(auth()->user()->role === 'employee')
                         <li class="nav-item">
                             <a href="{{ route('employee.dashboard') }}" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
@@ -140,15 +148,27 @@
                         <li class="nav-item">
                             <a href="{{ route('bookings.index') }}" class="nav-link"><i class="bi bi-calendar-check"></i> My Bookings</a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('notifications.index') }}" class="nav-link">
+                                <i class="bi bi-bell"></i> Notifications
+                                @php
+                                    $unreadCount = \App\Models\Notification::where('user_id', auth()->id())->where('is_read', false)->count();
+                                @endphp
+                                @if($unreadCount > 0)
+                                    <span class="badge bg-danger">{{ $unreadCount }}</span>
+                                @endif
+                            </a>
+                        </li>
                     @endif
                 @endauth
+
             </ul>
 
             <ul class="navbar-nav">
                 @auth
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i> {{ auth()->user()->firstname }} - {{ Auth::user()->lastname }}
+                            <i class="bi bi-person-circle"></i> {{ auth()->user()->firstname }} {{ auth()->user()->lastname }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
@@ -158,9 +178,12 @@
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <form method="POST" action="{{ route('logout') }}">
+                                <!-- Logout Confirmation -->
+                                <form id="logoutForm" method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <button class="dropdown-item"><i class="bi bi-box-arrow-right"></i> Logout</button>
+                                    <button type="button" class="dropdown-item" onclick="confirmLogout()">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </button>
                                 </form>
                             </li>
                         </ul>
@@ -174,7 +197,6 @@
 <!-- Main Content -->
 <main>
     @yield('content')
-
 </main>
 
 <!-- Footer -->
@@ -187,7 +209,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // SweetAlert: session success message
+    // SweetAlert Success Message
     @if(session('success'))
     Swal.fire({
         icon: 'success',
@@ -211,6 +233,24 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 document.getElementById(formId).submit();
+            }
+        });
+    }
+
+    // ✅ SweetAlert Logout Confirmation
+    function confirmLogout() {
+        Swal.fire({
+            title: 'Logout Confirmation',
+            text: 'Are you sure you want to logout?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, logout',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('logoutForm').submit();
             }
         });
     }

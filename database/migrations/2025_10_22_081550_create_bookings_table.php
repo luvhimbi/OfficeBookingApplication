@@ -25,10 +25,10 @@ return new class extends Migration
 
             $table->enum('status', ['booked', 'cancelled', 'completed'])->default('booked');
 
-            $table->boolean('is_recurring')->default(false);
-            $table->string('recurring_day')->nullable(); // e.g., 'Wednesday'
-            $table->date('recurring_until')->nullable(); // end date (one month later)
-            $table->foreignId('parent_booking_id')->nullable()->constrained('bookings')->onDelete('cascade');
+//            $table->boolean('is_recurring')->default(false);
+//            $table->string('recurring_day')->nullable(); // e.g., 'Wednesday'
+//            $table->date('recurring_until')->nullable(); // end date (one month later)
+//            $table->foreignId('parent_booking_id')->nullable()->constrained('bookings')->onDelete('cascade');
 
             $table->timestamps();
 

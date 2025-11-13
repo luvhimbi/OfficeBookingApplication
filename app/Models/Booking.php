@@ -19,10 +19,10 @@ class Booking extends Model
         'start_time',
         'end_time',
         'status',
-        'is_recurring',
-        'recurring_day',
-        'recurring_until',
-        'parent_booking_id',
+//        'is_recurring',
+//        'recurring_day',
+//        'recurring_until',
+//        'parent_booking_id',
     ];
 
     public function user()
@@ -55,8 +55,8 @@ class Booking extends Model
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',
-        'recurring_until' => 'date',
-        'is_recurring' => 'boolean'
+//        'recurring_until' => 'date',
+//        'is_recurring' => 'boolean'
     ];
 
     public function space()

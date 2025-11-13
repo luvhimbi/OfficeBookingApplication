@@ -4,7 +4,6 @@
 
 @section('content')
     <style>
-        /* Make tabs black even when active or clicked */
         .nav-tabs .nav-link {
             color: #000 !important;
             font-weight: 500;
@@ -23,10 +22,30 @@
             background-color: transparent !important;
             font-weight: 600;
         }
+
+        /* Status badges */
+        .badge-status {
+            font-size: 0.85rem;
+            padding: 0.4em 0.7em;
+            border-radius: 0.5rem;
+        }
+        .badge-booked {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+        .badge-cancelled {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        .badge-completed {
+            background-color: #198754;
+            color: #fff;
+        }
     </style>
+
     <div class="container">
 
-        {{-- ====================== 1. Greeting Section ====================== --}}
+        {{-- Greeting --}}
         <div class="card greeting-card mb-4 border-0 shadow">
             <div class="card-body p-4">
                 <div class="row align-items-center">
@@ -47,7 +66,7 @@
             </div>
         </div>
 
-        {{-- ====================== 2. Suggested/Favorite Bookings ====================== --}}
+        {{-- Quick Book --}}
         @if($favoriteSpaces->isNotEmpty())
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header">
@@ -65,11 +84,11 @@
                                         <p class="card-text mb-1"><strong>Space Type:</strong> {{ ucfirst($space->space_type) }}</p>
                                         <p class="card-text mb-3"><strong>Times Booked:</strong> {{ $space->booked_count }}</p>
                                         <a href="{{ route('bookings.create', [
-                                    'campus_id' => $space->campus_id,
-                                    'building_id' => $space->building_id,
-                                    'floor_id' => $space->floor_id,
-                                    'space_type' => $space->space_type
-                                ]) }}"
+                                            'campus_id' => $space->campus_id,
+                                            'building_id' => $space->building_id,
+                                            'floor_id' => $space->floor_id,
+                                            'space_type' => $space->space_type
+                                        ]) }}"
                                            class="btn btn-primary mt-auto">
                                             Book Again
                                         </a>
@@ -82,7 +101,7 @@
             </div>
         @endif
 
-        {{-- ====================== 3. Bookings Section (Tabs) ====================== --}}
+        {{-- My Bookings Tabs --}}
         <div class="card shadow border-0">
             <div class="card-header">
                 <h5 class="mb-0">My Bookings</h5>
@@ -121,6 +140,7 @@
                                         <th>Space Type</th>
                                         <th>Start Time</th>
                                         <th>End Time</th>
+                                        <th>Status</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -133,6 +153,11 @@
                                             <td>{{ ucfirst($booking->space_type) }}</td>
                                             <td>{{ \Carbon\Carbon::parse($booking->start_time)->format('d M Y, H:i') }}</td>
                                             <td>{{ \Carbon\Carbon::parse($booking->end_time)->format('d M Y, H:i') }}</td>
+                                            <td>
+                                                <span class="badge badge-status badge-{{ $booking->status }}">
+                                                    {{ ucfirst($booking->status) }}
+                                                </span>
+                                            </td>
                                         </tr>
                                     @endforeach
                                     </tbody>
@@ -157,6 +182,7 @@
                                         <th>Space Type</th>
                                         <th>Start Time</th>
                                         <th>End Time</th>
+                                        <th>Status</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -169,6 +195,11 @@
                                             <td>{{ ucfirst($booking->space_type) }}</td>
                                             <td>{{ \Carbon\Carbon::parse($booking->start_time)->format('d M Y, H:i') }}</td>
                                             <td>{{ \Carbon\Carbon::parse($booking->end_time)->format('d M Y, H:i') }}</td>
+                                            <td>
+                                                <span class="badge badge-status badge-{{ $booking->status }}">
+                                                    {{ ucfirst($booking->status) }}
+                                                </span>
+                                            </td>
                                         </tr>
                                     @endforeach
                                     </tbody>
@@ -180,11 +211,10 @@
                 </div>
             </div>
         </div>
-
     </div>
+
     @push('scripts')
         <script>
-            // Time-based greeting
             document.addEventListener('DOMContentLoaded', function() {
                 const now = new Date();
                 const hour = now.getHours();

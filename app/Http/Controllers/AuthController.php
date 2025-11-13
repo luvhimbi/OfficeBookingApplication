@@ -2,12 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\OtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
+
 {
+    protected $otpService;
+
+    public function __construct(OtpService $otpService)
+    {
+        $this->otpService = $otpService;
+    }
     public function showLoginForm()
     {
         return view('auth.login');
@@ -24,6 +32,15 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
+
+            if ($user->two_factor_enabled) {
+
+                $otpService->sendOtp($user);
+
+                Auth::logout();
+
+                return redirect()->route('2fa.verify.form')->with('email', $user->email);
+            }
 
             // Role-based redirection
             if ($user->role === 'admin') {
@@ -78,4 +95,15 @@ class AuthController extends Controller
 
         return redirect()->route('profile.show')->with('success', 'Profile updated successfully.');
     }
+    public function toggle2FA(Request $request)
+    {
+        $user = Auth::user();
+
+        $user->two_factor_enabled = !$user->two_factor_enabled;
+        $user->save();
+
+        return back()->with('success', $user->two_factor_enabled
+            ? 'Two-Factor Authentication has been enabled.'
+            : 'Two-Factor Authentication has been disabled.');
+ }
 }

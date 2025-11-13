@@ -8,12 +8,21 @@ use App\Models\Building;
 use App\Models\Campus;
 use App\Models\Desk;
 use App\Models\Floor;
+use App\Services\EmailService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
+    protected $emailService;
+    protected  $notificationService;
 
+    public function __construct(EmailService $emailService,NotificationService $notificationService)
+    {
+        $this->emailService = $emailService;
+        $this->notificationService = $notificationService;
+    }
     public function index()
     {
         $bookings = Booking::with(['user', 'campus', 'building', 'boardroom' ,'floor'])
@@ -148,7 +157,7 @@ class BookingController extends Controller
             return back()->withErrors(['space_id' => 'This space is already booked for the selected time.'])->withInput();
         }
 
-        Booking::create([
+        $booking = Booking::create([
             'user_id' => Auth::id(),
             'campus_id' => $validated['campus_id'],
             'building_id' => $validated['building_id'],
@@ -160,7 +169,42 @@ class BookingController extends Controller
             'status' => 'booked',
         ]);
 
+        $this->emailService->sendBookingConfirmation($booking);
+        $this->notificationService->createNotification(
+            $booking->user_id,
+            'Booking Confirmed',
+            "Your booking for {$booking->space_type} on {$booking->date} from {$booking->start_time} to {$booking->end_time} is confirmed.",
+            'success'
+        );
         return redirect()->route('bookings.index')->with('success', 'Booking created successfully!');
+    }
+
+    public function cancel($id)
+    {
+        $booking = Booking::findOrFail($id);
+
+        // Only the owner or an admin can cancel
+        if ($booking->user_id !== Auth::id() && !Auth::user()->hasRole('admin')) {
+            return redirect()->back()->with('error', 'You are not authorized to cancel this booking.');
+        }
+
+        // Prevent duplicate cancellation
+        if ($booking->status === 'cancelled') {
+            return redirect()->back()->with('info', 'This booking is already cancelled.');
+        }
+
+        // Update booking status
+        $booking->update(['status' => 'cancelled']);
+
+        $this->emailService->sendBookingCancellation($booking);
+        $this->notificationService->createNotification(
+            $booking->user_id,
+            'Booking Cancelled',
+            "Your booking for {$booking->space_type} on {$booking->date} has been cancelled.",
+            'error'
+        );
+
+        return redirect()->route('bookings.index')->with('success', 'Booking cancelled successfully.');
     }
 
 }

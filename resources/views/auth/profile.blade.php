@@ -5,7 +5,8 @@
 @section('content')
     <div class="row justify-content-center">
         <div class="col-md-7">
-            <div class="card shadow-sm border-0 rounded-4">
+            {{-- Profile & Password Section --}}
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
                 <div class="card-body p-4">
                     <h3 class="mb-4"><i class="bi bi-person-badge text-primary"></i> My Profile</h3>
 
@@ -29,12 +30,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Position</label>
-                            <input type="text"
-                                   class="form-control bg-light"
-                                   value="{{ $user->position }}"
-                                   disabled
-                                   readonly>
-                            <!-- Hidden input to keep value submitted if needed -->
+                            <input type="text" class="form-control bg-light" value="{{ $user->position }}" disabled readonly>
                             <input type="hidden" name="position" value="{{ $user->position }}">
                         </div>
 
@@ -59,6 +55,35 @@
                     </form>
                 </div>
             </div>
+
+            {{-- 2FA Section --}}
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h3 class="mb-4"><i class="bi bi-shield-lock text-primary"></i> Two-Factor Authentication (2FA)</h3>
+
+                    {{-- Constant status alert --}}
+                    <div class="alert {{ $user->two_factor_enabled ? 'alert-success' : 'alert-warning' }}">
+                        2FA is currently <strong>{{ $user->two_factor_enabled ? 'Enabled' : 'Disabled' }}</strong>.
+                    </div>
+
+                    {{-- Success message after toggle --}}
+                    @if(session('2fa_success'))
+                        <div class="alert alert-success">{{ session('2fa_success') }}</div>
+                    @endif
+
+                    <form method="POST" action="{{ route('profile.2fa.toggle') }}">
+                        @csrf
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="two_factor_enabled" id="two_factor_enabled" {{ $user->two_factor_enabled ? 'checked' : '' }} onchange="this.form.submit()">
+                            <label class="form-check-label" for="two_factor_enabled">
+                                {{ $user->two_factor_enabled ? 'Enabled' : 'Disabled' }}
+                            </label>
+                        </div>
+                        <small class="text-muted d-block mt-2">Toggle to enable or disable two-factor authentication using email.</small>
+                    </form>
+                </div>
+            </div>
+
         </div>
     </div>
 @endsection
