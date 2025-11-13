@@ -137,235 +137,116 @@
     </div>
 @endsection
 @push('scripts')
+    <script src="{{ asset('js/booking-form.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Get CSRF token from meta tag
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-            // Get form elements
-            const campusSelect = document.getElementById('campus_id');
-            const buildingSelect = document.getElementById('building_id');
-            const floorSelect = document.getElementById('floor_id');
-            const typeSelect = document.getElementById('space_type');
-            const spaceSelect = document.getElementById('space_id');
-
-            // Get loader spinners
-            const buildingLoader = document.getElementById('buildingLoader');
-            const floorLoader = document.getElementById('floorLoader');
-            const spaceLoader = document.getElementById('spaceLoader');
-
-            // Verify elements exist
-            if (!campusSelect || !buildingSelect || !floorSelect || !typeSelect || !spaceSelect) {
-                console.error('One or more form elements not found');
-                return;
+            console.log('DOM fully loaded');
+            
+            // Function to get URL parameters
+            function getUrlParameter(name) {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(name);
             }
 
-            /**
-             * Helper function to show loader
-             */
-            function showLoader(loader) {
-                if (loader) loader.classList.remove('d-none');
+            // Get parameters from URL
+            const campusId = getUrlParameter('campus_id');
+            const buildingId = getUrlParameter('building_id');
+            const floorId = getUrlParameter('floor_id');
+            const spaceType = getUrlParameter('space_type');
+
+            console.log('URL Parameters:', { campusId, buildingId, floorId, spaceType });
+
+            // Function to wait for element to be available
+            function waitForElement(selector, callback, maxAttempts = 10, interval = 500) {
+                let attempts = 0;
+                const checkElement = () => {
+                    attempts++;
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        console.log(`Element found: ${selector}`);
+                        callback(element);
+                    } else if (attempts < maxAttempts) {
+                        console.log(`Waiting for element: ${selector} (attempt ${attempts})`);
+                        setTimeout(checkElement, interval);
+                    } else {
+                        console.error(`Element not found: ${selector} after ${maxAttempts} attempts`);
+                    }
+                };
+                checkElement();
             }
 
-            /**
-             * Helper function to hide loader
-             */
-            function hideLoader(loader) {
-                if (loader) loader.classList.add('d-none');
+            // Function to trigger change event with retry
+            function triggerChange(element, callback, retries = 3, delay = 500) {
+                if (!element) {
+                    console.error('Element is null');
+                    return;
+                }
+                
+                const event = new Event('change', { bubbles: true });
+                element.dispatchEvent(event);
+                console.log(`Change event triggered for:`, element);
+                
+                if (callback && retries > 0) {
+                    setTimeout(() => {
+                        if (!callback()) {
+                            console.log(`Retrying change event for:`, element);
+                            triggerChange(element, callback, retries - 1, delay);
+                        }
+                    }, delay);
+                }
             }
 
-            /**
-             * Helper function to reset a dropdown
-             */
-            function resetDropdown(select, placeholder = 'Select Option') {
-                select.innerHTML = `<option value="">${placeholder}</option>`;
-                select.disabled = true;
-            }
-
-            /**
-             * Helper function to populate a dropdown
-             */
-            function populateDropdown(select, items, textKey, valueKey = 'id') {
-                select.innerHTML = `<option value="">Select ${select.name}</option>`;
-
-                items.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item[valueKey];
-                    option.textContent = item[textKey];
-                    select.appendChild(option);
+            // If we have a campus ID, start the auto-population process
+            if (campusId) {
+                console.log('Starting auto-population with campus ID:', campusId);
+                
+                // Wait for campus select to be available
+                waitForElement('#campus_id', (campusSelect) => {
+                    console.log('Setting campus:', campusId);
+                    campusSelect.value = campusId;
+                    
+                    // Trigger change event for campus
+                    triggerChange(campusSelect, () => {
+                        // After campus loads, set building if available
+                        if (buildingId) {
+                            setTimeout(() => {
+                                waitForElement('#building_id', (buildingSelect) => {
+                                    console.log('Setting building:', buildingId);
+                                    buildingSelect.value = buildingId;
+                                    
+                                    // Trigger change event for building
+                                    triggerChange(buildingSelect, () => {
+                                        // After building loads, set floor if available
+                                        if (floorId) {
+                                            setTimeout(() => {
+                                                waitForElement('#floor_id', (floorSelect) => {
+                                                    console.log('Setting floor:', floorId);
+                                                    floorSelect.value = floorId;
+                                                    
+                                                    // Trigger change event for floor
+                                                    triggerChange(floorSelect, () => {
+                                                        // Finally, set space type if available
+                                                        if (spaceType) {
+                                                            setTimeout(() => {
+                                                                waitForElement('#space_type', (typeSelect) => {
+                                                                    console.log('Setting space type:', spaceType);
+                                                                    typeSelect.value = spaceType;
+                                                                    const typeEvent = new Event('change', { bubbles: true });
+                                                                    typeSelect.dispatchEvent(typeEvent);
+                                                                });
+                                                            }, 1000);
+                                                        }
+                                                    });
+                                                });
+                                            }, 1500);
+                                        }
+                                    });
+                                });
+                            }, 1500);
+                        }
+                    });
                 });
-
-                select.disabled = false;
             }
-
-            /**
-             * Fetch data via AJAX
-             */
-            async function fetchData(url) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'GET',
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    const result = await response.json();
-
-                    if (!result.success) {
-                        throw new Error(result.message || 'Request failed');
-                    }
-
-                    return result.data;
-                } catch (error) {
-                    console.error('Fetch error:', error);
-                    alert('Error loading data: ' + error.message);
-                    return null;
-                }
-            }
-
-            // ==================== CAMPUS CHANGE ====================
-            campusSelect.addEventListener('change', async function() {
-                const campusId = this.value;
-                console.log('Campus selected:', campusId);
-
-                // Reset dependent dropdowns
-                resetDropdown(buildingSelect, 'Select Building');
-                resetDropdown(floorSelect, 'Select Floor');
-                typeSelect.value = '';
-                typeSelect.disabled = true;
-                resetDropdown(spaceSelect, 'Select Space');
-
-                if (!campusId) {
-                    console.log('No campus selected');
-                    return;
-                }
-
-                // Show loader and fetch buildings
-                showLoader(buildingLoader);
-                const buildings = await fetchData(`/bookings/get-buildings/${campusId}`);
-                hideLoader(buildingLoader);
-
-                if (buildings && buildings.length > 0) {
-                    populateDropdown(buildingSelect, buildings, 'name');
-                    console.log('Buildings loaded:', buildings.length);
-                } else {
-                    alert('No buildings available for this campus');
-                }
-            });
-
-            // ==================== BUILDING CHANGE ====================
-            buildingSelect.addEventListener('change', async function() {
-                const buildingId = this.value;
-                console.log('Building selected:', buildingId);
-
-                // Reset dependent dropdowns
-                resetDropdown(floorSelect, 'Select Floor');
-                typeSelect.value = '';
-                typeSelect.disabled = true;
-                resetDropdown(spaceSelect, 'Select Space');
-
-                if (!buildingId) {
-                    console.log('No building selected');
-                    return;
-                }
-
-                // Show loader and fetch floors
-                showLoader(floorLoader);
-                const floors = await fetchData(`/bookings/get-floors/${buildingId}`);
-                hideLoader(floorLoader);
-
-                if (floors && floors.length > 0) {
-                    populateDropdown(floorSelect, floors, 'name');
-                    console.log('Floors loaded:', floors.length);
-                } else {
-                    alert('No floors available for this building');
-                }
-            });
-
-            // ==================== FLOOR CHANGE ====================
-            floorSelect.addEventListener('change', function() {
-                const floorId = this.value;
-                console.log('Floor selected:', floorId);
-
-                // Reset dependent dropdowns
-                typeSelect.value = '';
-                resetDropdown(spaceSelect, 'Select Space');
-
-                if (!floorId) {
-                    typeSelect.disabled = true;
-                    return;
-                }
-
-                // Enable space type selection
-                typeSelect.disabled = false;
-            });
-
-            // ==================== SPACE TYPE CHANGE ====================
-            typeSelect.addEventListener('change', async function() {
-                const spaceType = this.value;
-                const floorId = floorSelect.value;
-
-                console.log('Space type selected:', spaceType);
-
-                // Reset space dropdown
-                resetDropdown(spaceSelect, 'Select Space');
-
-                if (!spaceType || !floorId) {
-                    console.log('No space type or floor selected');
-                    return;
-                }
-
-                // Show loader and fetch spaces
-                showLoader(spaceLoader);
-                const result = await fetchData(`/bookings/get-spaces/${floorId}/${spaceType}`);
-                hideLoader(spaceLoader);
-
-                if (result && result.length > 0) {
-                    spaceSelect.innerHTML = '<option value="">Select Space</option>';
-
-                    result.forEach(space => {
-                        const option = document.createElement('option');
-                        option.value = space.id;
-
-                        if (spaceType === 'desk') {
-                            option.textContent = `Desk #${space.desk_number}`;
-                        } else if (spaceType === 'boardroom') {
-                            option.textContent = space.name;
-                            if (space.capacity) {
-                                option.textContent += ` (Capacity: ${space.capacity})`;
-                            }
-                        }
-
-                        spaceSelect.appendChild(option);
-                    });
-
-                    spaceSelect.disabled = false;
-                    console.log('Spaces loaded:', result.length);
-                } else {
-                    alert(`No ${spaceType}s available on this floor`);
-                }
-            });
-
-            // ==================== FORM VALIDATION ====================
-            const form = document.getElementById('bookingForm');
-            if (form) {
-                form.addEventListener('submit', function(event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    form.classList.add('was-validated');
-                }, false);
-            }
-
-            console.log('AJAX Booking Form initialized');
         });
     </script>
 @endpush

@@ -30,7 +30,6 @@
                             <th>Campus</th>
                             <th>Building</th>
                             <th>Floor</th>
-                            <th>Date</th>
                             <th>Start Time</th>
                             <th>End Time</th>
                             <th>Actions</th>
@@ -51,9 +50,8 @@
                                 <td>{{ $booking->campus->name ?? 'N/A' }}</td>
                                 <td>{{ $booking->building->name ?? 'N/A' }}</td>
                                 <td>{{ $booking->floor->name ?? 'N/A' }}</td>
-                                <td>{{ \Carbon\Carbon::parse($booking->date)->format('d M Y') }}</td>
-                                <td>{{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }}</td>
-                                <td>{{ \Carbon\Carbon::parse($booking->end_time)->format('H:i') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($booking->start_time)->format('d M Y, H:i') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($booking->end_time)->format('d M Y, H:i') }}</td>
                                 <td>
                                     <a href="{{ route('bookings.show', $booking->id) }}" class="btn btn-info btn-sm">
                                         <i class="bi bi-eye"></i> View

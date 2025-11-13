@@ -52,6 +52,12 @@ class Booking extends Model
     {
         return $this->belongsTo(Desk::class);
     }
+    protected $casts = [
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
+        'recurring_until' => 'date',
+        'is_recurring' => 'boolean'
+    ];
 
     public function space()
     {
