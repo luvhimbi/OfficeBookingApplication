@@ -10,12 +10,13 @@ use Illuminate\Support\Facades\Mail;
 class EmailService
 {
 
+
     public function sendEmail(string $to, string $subject, string $body)
     {
         Mail::send([], [], function ($message) use ($to, $subject, $body) {
             $message->to($to)
                 ->subject($subject)
-                ->setBody($body, 'text/html');
+                ->html($body); // Use html() instead of setBody
         });
     }
     /**

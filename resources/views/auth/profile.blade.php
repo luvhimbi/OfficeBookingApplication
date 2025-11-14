@@ -6,7 +6,7 @@
     <div class="row justify-content-center">
         <div class="col-md-7">
             {{-- Profile & Password Section --}}
-            <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card  border-0 mb-4">
                 <div class="card-body p-4">
                     <h3 class="mb-4"><i class="bi bi-person-badge text-primary"></i> My Profile</h3>
 
@@ -57,7 +57,7 @@
             </div>
 
             {{-- 2FA Section --}}
-            <div class="card shadow-sm border-0 rounded-4">
+            <div class="card  border-0">
                 <div class="card-body p-4">
                     <h3 class="mb-4"><i class="bi bi-shield-lock text-primary"></i> Two-Factor Authentication (2FA)</h3>
 

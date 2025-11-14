@@ -35,11 +35,11 @@ class AuthController extends Controller
 
             if ($user->two_factor_enabled) {
 
-                $otpService->sendOtp($user);
+                $this->otpService->sendOtp($user);
 
-                Auth::logout();
 
-                return redirect()->route('2fa.verify.form')->with('email', $user->email);
+
+                return redirect()->route('otp.verify.form')->with('email', $user->email);
             }
 
             // Role-based redirection

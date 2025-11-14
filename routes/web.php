@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OtpController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,10 @@ Route::post('/password/reset/update', [PasswordResetController::class, 'resetPas
 // Logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::get('/verify-otp', [OtpController::class, 'showVerifyForm'])->name('otp.verify.form');
+Route::post('/verify-otp', [OtpController::class, 'verifyOtp'])->name('otp.verify');
+Route::post('/resend-otp', [OtpController::class, 'resendOtp'])->name('otp.resend');
+
 // Profile
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile'])->name('profile.show');
@@ -32,14 +37,11 @@ Route::middleware('auth')->group(function () {
 //Otp routes
 
 // Dashboards
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth','2fa','prevent-back-history'])->group(function () {
     Route::get('/admin/dashboard', function () {
         return view('Admin.dashboard');
     })->name('admin.dashboard');
 
-    Route::get('/verify-otp', [OtpController::class, 'showVerifyForm'])->name('otp.verify.form');
-    Route::post('/verify-otp', [OtpController::class, 'verifyOtp'])->name('otp.verify');
-    Route::post('/resend-otp', [OtpController::class, 'resendOtp'])->name('otp.resend');
 
     Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
     // Campus Management Routes (Admin Only)
@@ -78,9 +80,13 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-});
+
 
     Route::get('/employee/dashboard',[DashboardController::class,'index'])->name('employee.dashboard');
+
+});
+
+
 
 Route::get('/', function () {
     return view('welcome');
