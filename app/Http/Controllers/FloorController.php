@@ -5,44 +5,36 @@ namespace App\Http\Controllers;
 use App\Models\Floor;
 use App\Models\Building;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Services\FloorService;
 
 class FloorController extends Controller
 {
-    /**
-     * Display a listing of the floors.
-     */
-    public function index(Request $request)
+    protected $floorService;
+
+    public function __construct(FloorService $floorService)
     {
-        if ($request->has('building_id')) {
-            $building = Building::findOrFail($request->building_id);
-            $floors = Floor::where('building_id', $building->id)->with('building')->get();
-            return view('admin.floors.index', compact('floors', 'building'));
-        } else {
-            $floors = Floor::with('building')->get();
-            return view('admin.floors.index', compact('floors'));
-        }
+        $this->floorService = $floorService;
     }
 
-    /**
-     * Show the form for creating a new floor.
-     */
+    public function index(Request $request)
+    {
+        $buildingId = $request->building_id ?? null;
+        $floors = $this->floorService->getAll($buildingId);
+
+        $building = $buildingId ? Building::findOrFail($buildingId) : null;
+
+        return view('admin.floors.index', compact('floors', 'building'));
+    }
+
     public function create(Request $request)
     {
         $buildings = Building::where('is_active', true)->get();
         $selectedBuildingId = $request->building_id;
+        $building = $selectedBuildingId ? Building::findOrFail($selectedBuildingId) : null;
 
-        if ($selectedBuildingId) {
-            $building = Building::findOrFail($selectedBuildingId);
-            return view('admin.floors.create', compact('buildings', 'selectedBuildingId', 'building'));
-        }
-
-        return view('admin.floors.create', compact('buildings'));
+        return view('admin.floors.create', compact('buildings', 'selectedBuildingId', 'building'));
     }
 
-    /**
-     * Store a newly created floor in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -50,38 +42,27 @@ class FloorController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        $floor = Floor::create($validated);
+        $floor = $this->floorService->create($validated);
 
-        // If we're coming from a specific building context, redirect back to that building's floors
         if ($request->has('from_building')) {
             return redirect()->route('floors.index', ['building_id' => $floor->building_id])
                 ->with('success', 'Floor created successfully.');
         }
 
-        return redirect()->route('floors.index')
-            ->with('success', 'Floor created successfully.');
+        return redirect()->route('floors.index')->with('success', 'Floor created successfully.');
     }
 
-    /**
-     * Display the specified floor.
-     */
     public function show(Floor $floor)
     {
         return view('admin.floors.show', compact('floor'));
     }
 
-    /**
-     * Show the form for editing the specified floor.
-     */
     public function edit(Floor $floor)
     {
         $buildings = Building::where('is_active', true)->get();
         return view('admin.floors.edit', compact('floor', 'buildings'));
     }
 
-    /**
-     * Update the specified floor in storage.
-     */
     public function update(Request $request, Floor $floor)
     {
         $validated = $request->validate([
@@ -89,20 +70,15 @@ class FloorController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        $floor->update($validated);
+        $this->floorService->update($floor, $validated);
 
-        return redirect()->route('floors.index')
-            ->with('success', 'Floor updated successfully.');
+        return redirect()->route('floors.index')->with('success', 'Floor updated successfully.');
     }
 
-    /**
-     * Remove the specified floor from storage.
-     */
     public function destroy(Floor $floor)
     {
-        $floor->delete();
+        $this->floorService->delete($floor);
 
-        return redirect()->route('floors.index')
-            ->with('success', 'Floor deleted successfully.');
+        return redirect()->route('floors.index')->with('success', 'Floor deleted successfully.');
     }
 }

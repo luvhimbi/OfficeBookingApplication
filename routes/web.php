@@ -12,19 +12,25 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-
-Route::get('/password/reset', [PasswordResetController::class, 'showRequestForm'])->name('password.request');
-Route::post('/password/reset', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/password/reset', [PasswordResetController::class, 'showRequestForm'])->name('password.request');
+    Route::post('/password/reset', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
 
 // Show reset password form with token
-Route::get('/password/reset/{token}', [PasswordResetController::class, 'resetForm'])->name('password.reset');
+    Route::get('/password/reset/{token}', [PasswordResetController::class, 'resetForm'])->name('password.reset');
 
 // Handle password update
-Route::post('/password/reset/update', [PasswordResetController::class, 'resetPassword'])->name('password.update');
-// Logout
+    Route::post('/password/reset/update', [PasswordResetController::class, 'resetPassword'])->name('password.update');
+
+    Route::get('/', function () {
+        return redirect()->route('login');
+    });
+
+});
+
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/verify-otp', [OtpController::class, 'showVerifyForm'])->name('otp.verify.form');
@@ -36,6 +42,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile'])->name('profile.show');
     Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
     Route::post('profile/2fa-toggle', [AuthController::class, 'toggle2FA'])->name('profile.2fa.toggle');
+    Route::get('/profile/devices', [App\Http\Controllers\DeviceController::class, 'index'])->name('profile.devices');
+    Route::post('/profile/devices/logout/{id}', [App\Http\Controllers\DeviceController::class, 'logout'])->name('profile.devices.logout');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -113,6 +121,4 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-Route::get('/', function () {
-    return view('welcome');
-});
+

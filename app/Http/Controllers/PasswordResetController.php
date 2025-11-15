@@ -2,59 +2,43 @@
 
 namespace App\Http\Controllers;
 
-
-use App\Services\EmailService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
-use Carbon\Carbon;
-use App\Models\User;
+use App\Services\PasswordResetService;
 
 class PasswordResetController extends Controller
 {
+    protected $resetService;
 
-    protected $emailService;
-
-    public function __construct(EmailService $emailService)
+    public function __construct(PasswordResetService $resetService)
     {
-        $this->emailService = $emailService;
+        $this->resetService = $resetService;
     }
 
-
-    // Show the form where user inputs email
+    // Show form to input email
     public function showRequestForm()
     {
         return view('auth.email');
     }
 
-    // Handle form submission
+    // Handle request and send reset link
     public function sendResetLink(Request $request)
     {
-        $request->validate(['email' => 'required|email|exists:users,email']);
+        $request->validate([
+            'email' => 'required|email|exists:users,email'
+        ]);
 
-        $token = Str::random(64);
-
-        // Store token in password_resets table
-        DB::table('password_reset_tokens')->updateOrInsert(
-            ['email' => $request->email],
-            ['token' => $token, 'created_at' => now()]
-        );
-
-        $user = User::where('email', $request->email)->first();
-        $resetLink = url("/password/reset/{$token}");
-
-        $this->emailService->sendPasswordReset($user, $resetLink);
+        $this->resetService->sendResetLink($request->email);
 
         return back()->with('success', 'Password reset link sent to your email.');
     }
 
+    // Show reset password form
     public function resetForm($token)
     {
         return view('auth.reset', compact('token'));
     }
 
+    // Reset password
     public function resetPassword(Request $request)
     {
         $request->validate([
@@ -62,18 +46,11 @@ class PasswordResetController extends Controller
             'password' => 'required|confirmed|min:6',
         ]);
 
-        $record = DB::table('password_reset_tokens')->where('token', $request->token)->first();
+        $success = $this->resetService->resetPassword($request->token, $request->password);
 
-        if (!$record) {
+        if (!$success) {
             return redirect()->route('password.request')->with('error', 'Invalid or expired token.');
         }
-
-        $user = User::where('email', $record->email)->first();
-        $user->password = Hash::make($request->password);
-        $user->save();
-
-        // Delete token
-        DB::table('password_reset_tokens')->where('email', $user->email)->delete();
 
         return redirect()->route('login')->with('success', 'Password reset successfully.');
     }

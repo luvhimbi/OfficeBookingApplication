@@ -2,37 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Desk;
 use App\Models\Building;
 use App\Models\Campus;
-use App\Models\Desk;
 use App\Models\Floor;
 use Illuminate\Http\Request;
+use App\Services\DeskService;
 
 class DeskController extends Controller
 {
-    /**
-     * Display a listing of the desks.
-     */
+    protected $deskService;
+
+    public function __construct(DeskService $deskService)
+    {
+        $this->deskService = $deskService;
+    }
+
     public function index()
     {
-        $desks = Desk::with('floor','building','campus')->get();
+        $desks = $this->deskService->all();
         return view('admin.desks.index', compact('desks'));
     }
 
-    /**
-     * Show the form for creating a new desk.
-     */
     public function create()
     {
         $campuses = Campus::all();
         $buildings = Building::all();
         $floors = Floor::all();
-        return view('admin.desks.create', compact('floors','buildings','campuses'));
+        return view('admin.desks.create', compact('floors', 'buildings', 'campuses'));
     }
 
-    /**
-     * Store a newly created desk in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -42,15 +41,11 @@ class DeskController extends Controller
             'building_id' => 'required|exists:buildings,id',
         ]);
 
-        Desk::create($validated);
+        $this->deskService->create($validated);
 
-        return redirect()->route('desks.index')
-            ->with('success', 'Desk created successfully.');
+        return redirect()->route('desks.index')->with('success', 'Desk created successfully.');
     }
 
-    /**
-     * Show the form for editing the specified desk.
-     */
     public function edit(Desk $desk)
     {
         $campuses = Campus::all();
@@ -59,9 +54,6 @@ class DeskController extends Controller
         return view('admin.desks.edit', compact('desk', 'floors', 'buildings', 'campuses'));
     }
 
-    /**
-     * Update the specified desk in storage.
-     */
     public function update(Request $request, Desk $desk)
     {
         $validated = $request->validate([
@@ -71,20 +63,15 @@ class DeskController extends Controller
             'floor_id' => 'required|exists:floors,id',
         ]);
 
-        $desk->update($validated);
+        $this->deskService->update($desk, $validated);
 
-        return redirect()->route('desks.index')
-            ->with('success', 'Desk updated successfully.');
+        return redirect()->route('desks.index')->with('success', 'Desk updated successfully.');
     }
 
-    /**
-     * Remove the specified desk from storage.
-     */
     public function destroy(Desk $desk)
     {
-        $desk->delete();
+        $this->deskService->delete($desk);
 
-        return redirect()->route('desks.index')
-            ->with('success', 'Desk deleted successfully.');
+        return redirect()->route('desks.index')->with('success', 'Desk deleted successfully.');
     }
 }

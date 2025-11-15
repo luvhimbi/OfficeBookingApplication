@@ -7,21 +7,23 @@ use App\Models\Building;
 use App\Models\Campus;
 use App\Models\Floor;
 use Illuminate\Http\Request;
+use App\Services\BoardroomService;
 
 class BoardroomController extends Controller
 {
-    /**
-     * Display a listing of the boardrooms.
-     */
+    protected $boardroomService;
+
+    public function __construct(BoardroomService $boardroomService)
+    {
+        $this->boardroomService = $boardroomService;
+    }
+
     public function index()
     {
-        $boardrooms = Boardroom::with(['floor', 'building', 'campus'])->get();
+        $boardrooms = $this->boardroomService->getAllBoardrooms();
         return view('admin.boardrooms.index', compact('boardrooms'));
     }
 
-    /**
-     * Show the form for creating a new boardroom.
-     */
     public function create()
     {
         $campuses = Campus::all();
@@ -30,9 +32,6 @@ class BoardroomController extends Controller
         return view('admin.boardrooms.create', compact('campuses', 'buildings', 'floors'));
     }
 
-    /**
-     * Store a newly created boardroom in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -43,15 +42,12 @@ class BoardroomController extends Controller
             'floor_id' => 'required|exists:floors,id',
         ]);
 
-        Boardroom::create($validated);
-
+        $this->boardroomService->createBoardroom($validated);
 
         return redirect()->route('boardrooms.index')
             ->with('success', 'Boardroom created successfully.');
     }
-    /**
-     * Show the form for editing the specified boardroom.
-     */
+
     public function edit(Boardroom $boardroom)
     {
         $campuses = Campus::all();
@@ -60,9 +56,6 @@ class BoardroomController extends Controller
         return view('admin.boardrooms.edit', compact('boardroom', 'campuses', 'buildings', 'floors'));
     }
 
-    /**
-     * Update the specified boardroom in storage.
-     */
     public function update(Request $request, Boardroom $boardroom)
     {
         $validated = $request->validate([
@@ -73,18 +66,15 @@ class BoardroomController extends Controller
             'floor_id' => 'required|exists:floors,id',
         ]);
 
-        $boardroom->update($validated);
+        $this->boardroomService->updateBoardroom($boardroom, $validated);
 
         return redirect()->route('boardrooms.index')
             ->with('success', 'Boardroom updated successfully.');
     }
 
-    /**
-     * Remove the specified boardroom from storage.
-     */
     public function destroy(Boardroom $boardroom)
     {
-        $boardroom->delete();
+        $this->boardroomService->deleteBoardroom($boardroom);
 
         return redirect()->route('boardrooms.index')
             ->with('success', 'Boardroom deleted successfully.');

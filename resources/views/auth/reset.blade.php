@@ -1,4 +1,4 @@
-@extends('Layout.auth')
+@extends('Layout.app')
 
 @section('title', 'Set New Password')
 

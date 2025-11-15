@@ -84,6 +84,19 @@
                 </div>
             </div>
 
+            {{-- Add this after the 2FA section --}}
+            <div class="card border-0 mt-4">
+                <div class="card-body p-4">
+                    <h3 class="mb-4"><i class="bi bi-device-hdd text-primary"></i> Devices & Sessions</h3>
+
+                    <p class="mb-3">View all devices and sessions currently logged into your account. You can log out from any device you don’t recognize.</p>
+
+                    <a href="{{ route('profile.devices') }}" class="btn btn-info">
+                        <i class="bi bi-box-arrow-in-right"></i> View Devices
+                    </a>
+                </div>
+            </div>
+
         </div>
     </div>
 @endsection

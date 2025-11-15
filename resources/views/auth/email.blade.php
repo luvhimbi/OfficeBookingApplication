@@ -1,9 +1,9 @@
-@extends('Layout.auth')
+@extends('Layout.app')
 
 @section('title', 'Reset Password')
 
 @section('content')
-    <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center">
+    <div class="container-fluid  d-flex align-items-center justify-content-center">
         <div class="row w-100 mx-0 justify-content-center">
 
             <div class="col-md-6 col-lg-5 col-xl-4 bg-white  p-4">

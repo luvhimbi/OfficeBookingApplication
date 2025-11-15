@@ -4,35 +4,28 @@ namespace App\Http\Controllers;
 
 use App\Models\Campus;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Services\CampusService;
 
 class CampusController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     */
+    protected $campusService;
 
+    public function __construct(CampusService $campusService)
+    {
+        $this->campusService = $campusService;
+    }
 
-    /**
-     * Display a listing of the campuses.
-     */
     public function index()
     {
-        $campuses = Campus::all();
+        $campuses = $this->campusService->getAll();
         return view('admin.campuses.index', compact('campuses'));
     }
 
-    /**
-     * Show the form for creating a new campus.
-     */
     public function create()
     {
         return view('admin.campuses.create');
     }
 
-    /**
-     * Store a newly created campus in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -42,31 +35,22 @@ class CampusController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        Campus::create($validated);
+        $this->campusService->create($validated);
 
         return redirect()->route('campuses.index')
             ->with('success', 'Campus created successfully.');
     }
 
-    /**
-     * Display the specified campus.
-     */
     public function show(Campus $campus)
     {
         return view('admin.campuses.show', compact('campus'));
     }
 
-    /**
-     * Show the form for editing the specified campus.
-     */
     public function edit(Campus $campus)
     {
         return view('admin.campuses.edit', compact('campus'));
     }
 
-    /**
-     * Update the specified campus in storage.
-     */
     public function update(Request $request, Campus $campus)
     {
         $validated = $request->validate([
@@ -76,18 +60,15 @@ class CampusController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $campus->update($validated);
+        $this->campusService->update($campus, $validated);
 
         return redirect()->route('campuses.index')
             ->with('success', 'Campus updated successfully.');
     }
 
-    /**
-     * Remove the specified campus from storage.
-     */
     public function destroy(Campus $campus)
     {
-        $campus->delete();
+        $this->campusService->delete($campus);
 
         return redirect()->route('campuses.index')
             ->with('success', 'Campus deleted successfully.');

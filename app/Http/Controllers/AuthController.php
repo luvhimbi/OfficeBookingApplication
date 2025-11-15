@@ -2,20 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AuthService;
 use App\Services\OtpService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
-
 {
+    protected $authService;
     protected $otpService;
 
-    public function __construct(OtpService $otpService)
+    public function __construct(AuthService $authService, OtpService $otpService)
     {
+        $this->authService = $authService;
         $this->otpService = $otpService;
     }
+
     public function showLoginForm()
     {
         return view('auth.login');
@@ -24,58 +25,44 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
+        $user = $this->authService->login($credentials);
 
-            $user = Auth::user();
-
+        if ($user) {
             if ($user->two_factor_enabled) {
-
                 $this->otpService->sendOtp($user);
-
-
-
                 return redirect()->route('otp.verify.form')->with('email', $user->email);
             }
 
-            // Role-based redirection
-            if ($user->role === 'admin') {
-                return redirect()->route('admin.dashboard')->with('success', 'Welcome back, Admin!');
-            } elseif ($user->role === 'employee') {
-                return redirect()->route('employee.dashboard')->with('success', 'Welcome back!');
-            }
-
-            // Default fallback
-            return redirect()->route('home');
+            // Role-based redirect
+            return match($user->role) {
+                'admin' => redirect()->route('admin.dashboard')->with('success', 'Welcome back, Admin!'),
+                'employee' => redirect()->route('employee.dashboard')->with('success', 'Welcome back!'),
+                default => redirect()->route('home')
+            };
         }
 
-        return back()->withErrors([
-            'email' => 'Invalid credentials.',
-        ])->onlyInput('email');
+        return back()->withErrors(['email' => 'Invalid credentials.'])->onlyInput('email');
     }
 
-    public function logout(Request $request)
+    public function logout()
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
+        $this->authService->logout();
         return redirect()->route('login')->with('success', 'Logged out successfully.');
     }
 
     public function profile()
     {
-        $user = Auth::user();
+        $user = auth()->user();
         return view('auth.profile', compact('user'));
     }
 
     public function updateProfile(Request $request)
     {
-        $user = Auth::user();
+        $user = auth()->user();
 
         $validated = $request->validate([
             'firstname' => 'required|string|max:255',
@@ -84,26 +71,18 @@ class AuthController extends Controller
             'password' => 'nullable|min:6|confirmed',
         ]);
 
-        $user->update([
-            'firstname' => $validated['firstname'],
-            'lastname' => $validated['lastname'],
-            'email' => $validated['email'],
-            'password' => !empty($validated['password'])
-                ? Hash::make($validated['password'])
-                : $user->password,
-        ]);
+        $this->authService->updateProfile($user, $validated);
 
         return redirect()->route('profile.show')->with('success', 'Profile updated successfully.');
     }
-    public function toggle2FA(Request $request)
+
+    public function toggle2FA()
     {
-        $user = Auth::user();
+        $user = auth()->user();
+        $enabled = $this->authService->toggleTwoFactor($user);
 
-        $user->two_factor_enabled = !$user->two_factor_enabled;
-        $user->save();
-
-        return back()->with('success', $user->two_factor_enabled
+        return back()->with('success', $enabled
             ? 'Two-Factor Authentication has been enabled.'
             : 'Two-Factor Authentication has been disabled.');
- }
+    }
 }

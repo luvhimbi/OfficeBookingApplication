@@ -5,7 +5,7 @@
     <title>@yield('title') - WorkSpace Hub</title>
 
     <!-- Bootswatch Zephyr -->
-    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/zephyr/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/cosmo/bootstrap.min.css" rel="stylesheet">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
