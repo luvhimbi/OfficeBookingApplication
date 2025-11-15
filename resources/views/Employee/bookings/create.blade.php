@@ -4,10 +4,17 @@
 
 @section('content')
     <div class="container ">
-        <div class="card  border-0 p-4">
-            <div class="d-flex align-items-center mb-4">
-                <i class="bi bi-door-open text-primary fs-3 me-2"></i>
-                <h3 class="mb-0 fw-bold">Book a Space</h3>
+        <div class="card border-0 p-4">
+            <div class="d-flex align-items-center mb-4 justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-door-open text-primary fs-3 me-2"></i>
+                    <h3 class="mb-0 fw-bold">Book a Space</h3>
+                </div>
+
+                {{-- Calendar View Button --}}
+                <a href="{{ route('bookings.calendar') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-calendar3 me-1"></i> Calendar View
+                </a>
             </div>
 
             {{-- Error Alert --}}
@@ -141,7 +148,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM fully loaded');
-            
+
             // Function to get URL parameters
             function getUrlParameter(name) {
                 const urlParams = new URLSearchParams(window.location.search);
@@ -181,11 +188,11 @@
                     console.error('Element is null');
                     return;
                 }
-                
+
                 const event = new Event('change', { bubbles: true });
                 element.dispatchEvent(event);
                 console.log(`Change event triggered for:`, element);
-                
+
                 if (callback && retries > 0) {
                     setTimeout(() => {
                         if (!callback()) {
@@ -199,12 +206,12 @@
             // If we have a campus ID, start the auto-population process
             if (campusId) {
                 console.log('Starting auto-population with campus ID:', campusId);
-                
+
                 // Wait for campus select to be available
                 waitForElement('#campus_id', (campusSelect) => {
                     console.log('Setting campus:', campusId);
                     campusSelect.value = campusId;
-                    
+
                     // Trigger change event for campus
                     triggerChange(campusSelect, () => {
                         // After campus loads, set building if available
@@ -213,7 +220,7 @@
                                 waitForElement('#building_id', (buildingSelect) => {
                                     console.log('Setting building:', buildingId);
                                     buildingSelect.value = buildingId;
-                                    
+
                                     // Trigger change event for building
                                     triggerChange(buildingSelect, () => {
                                         // After building loads, set floor if available
@@ -222,7 +229,7 @@
                                                 waitForElement('#floor_id', (floorSelect) => {
                                                     console.log('Setting floor:', floorId);
                                                     floorSelect.value = floorId;
-                                                    
+
                                                     // Trigger change event for floor
                                                     triggerChange(floorSelect, () => {
                                                         // Finally, set space type if available

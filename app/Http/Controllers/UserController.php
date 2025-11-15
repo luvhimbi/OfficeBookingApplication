@@ -24,7 +24,7 @@ class UserController extends Controller
                 });
             })
             ->orderBy('firstname')
-            ->paginate(10);
+            ->paginate(5);
 
         return view('admin.users.index', compact('users', 'search'));
     }

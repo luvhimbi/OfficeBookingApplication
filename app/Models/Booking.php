@@ -11,23 +11,27 @@ class Booking extends Model
 
     protected $fillable = [
         'user_id',
+        'availability_id',
         'campus_id',
         'building_id',
         'floor_id',
         'space_type',
         'space_id',
-        'start_time',
-        'end_time',
+        'booking_date',
         'status',
-//        'is_recurring',
-//        'recurring_day',
-//        'recurring_until',
-//        'parent_booking_id',
+
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function casts(): array
+    {
+        return [
+            'booking_date' => 'date',
+        ];
     }
 
     public function campus()
@@ -52,11 +56,10 @@ class Booking extends Model
     {
         return $this->belongsTo(Desk::class);
     }
+
     protected $casts = [
         'start_time' => 'datetime',
-        'end_time' => 'datetime',
-//        'recurring_until' => 'date',
-//        'is_recurring' => 'boolean'
+        'end_time' => 'datetime'
     ];
 
     public function space()

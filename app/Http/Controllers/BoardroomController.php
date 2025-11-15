@@ -45,10 +45,10 @@ class BoardroomController extends Controller
 
         Boardroom::create($validated);
 
+
         return redirect()->route('boardrooms.index')
             ->with('success', 'Boardroom created successfully.');
     }
-
     /**
      * Show the form for editing the specified boardroom.
      */

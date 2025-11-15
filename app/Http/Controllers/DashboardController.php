@@ -40,4 +40,17 @@ class DashboardController extends Controller
 
         return view('employee.dashboard', compact('user', 'upcomingBookings', 'pastBookings', 'favoriteSpaces'));
     }
+
+    public function adminIndex()
+    {
+
+        $bookingsCount = Booking::count();
+        $usersCount = DB::table('users')->count();
+        $campusesCount = DB::table('campuses')->count();
+        $buildingsCount = DB::table('buildings')->count();
+        $floorsCount = DB::table('floors')->count();
+        $boardroomsCount = DB::table('boardrooms')->count();
+        $desksCount = DB::table('desks')->count();
+        return view('Admin.dashboard',compact('bookingsCount','usersCount','campusesCount','buildingsCount','floorsCount','boardroomsCount','desksCount'));
+    }
 }

@@ -67,6 +67,48 @@ class BookingController extends Controller
             ], 500);
         }
     }
+
+    public function calendarView()
+    {
+        $bookings = \App\Models\Booking::with(['desk', 'boardroom', 'user'])
+            ->where('status', 'booked')
+            ->get();
+
+        $events = $bookings->map(function($booking) {
+            $title = $booking->space_type === 'desk'
+                ? 'Desk: ' . ($booking->desk->desk_number ?? 'N/A')
+                : 'Boardroom: ' . ($booking->boardroom->name ?? 'N/A');
+
+            $title .= ' (' . $booking->user->firstname . ' ' . $booking->user->lastname . ')';
+
+            // Ensure proper date/time format
+            $startDateTime = $booking->date . 'T' . $this->formatTime($booking->start_time);
+            $endDateTime = $booking->date . 'T' . $this->formatTime($booking->end_time);
+
+            return [
+                'title' => $title,
+                'start' => $startDateTime,
+                'end' => $endDateTime,
+                'color' => $booking->space_type === 'desk' ? '#4e73df' : '#1cc88a',
+                'allDay' => false, // Explicitly set to false for timed events
+            ];
+        });
+
+        return view('Employee.bookings.calendar', compact('events'));
+    }
+
+// Helper method to format time
+    private function formatTime($time)
+    {
+        // If time is already in correct format, return as is
+        if (preg_match('/^\d{2}:\d{2}:\d{2}$/', $time)) {
+            return $time;
+        }
+
+        // If time is in 12-hour format, convert to 24-hour
+        return date('H:i:s', strtotime($time));
+    }
+
     /**
      * Get floors for a specific building (AJAX)
      */

@@ -4,18 +4,20 @@
     <meta charset="UTF-8">
     <title>@yield('title') - WorkSpace Hub</title>
 
-    {{-- Bootswatch Zephyr Theme --}}
+    <!-- Bootswatch Zephyr -->
     <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/zephyr/bootstrap.min.css" rel="stylesheet">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    {{-- Google Font --}}
+    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    {{-- Bootstrap Icons --}}
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    {{-- SweetAlert2 --}}
+    <!-- FullCalendar + SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
 
     <style>
         body {
@@ -29,16 +31,10 @@
             padding: 0.75rem 1rem;
         }
 
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.5rem;
-        }
-
         .nav-link {
             color: #adb5bd !important;
             font-weight: 500;
-            padding: 0.5rem 1rem !important;
-            transition: all 0.2s ease-in-out;
+            transition: 0.2s ease-in-out;
         }
 
         .nav-link:hover,
@@ -50,7 +46,6 @@
 
         .dropdown-menu {
             background-color: #343a40;
-            border: none;
         }
 
         .dropdown-item {
@@ -73,23 +68,14 @@
             padding: 20px 0;
             font-size: 14px;
         }
-
-        @media (max-width: 992px) {
-            .navbar-nav .dropdown-menu {
-                background-color: #2c3034;
-            }
-
-            main {
-                padding: 1rem;
-            }
-        }
     </style>
 </head>
 <body>
 
-<!-- Top Navbar -->
-<nav class="navbar navbar-expand-lg sticky-top bg-primary navbar-dark">
+<!-- TOP NAVBAR -->
+<nav class="navbar navbar-expand-lg sticky-top navbar-dark">
     <div class="container-fluid">
+
         <a class="navbar-brand" href="#">
             WorkSpace Hub
         </a>
@@ -99,107 +85,152 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarContent">
+
             <ul class="navbar-nav me-auto">
+
                 @auth
                     @if(auth()->user()->role === 'admin')
+
                         <li class="nav-item">
-                            <a href="{{ route('admin.dashboard') }}" class="nav-link @if(request()->is('admin/dashboard')) active @endif">
+                            <a href="{{ route('admin.dashboard') }}"
+                               class="nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}">
                                 <i class="bi bi-speedometer2"></i> Dashboard
                             </a>
                         </li>
 
+                        <!-- Facilities Dropdown -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
                                 <i class="bi bi-building"></i> Manage Facilities
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item @if(request()->is('campuses')) active @endif" href="{{ route('campuses.index') }}"><i class="bi bi-houses"></i> Campuses</a></li>
-                                <li><a class="dropdown-item @if(request()->is('buildings')) active @endif" href="{{ route('buildings.index') }}"><i class="bi bi-house"></i> Buildings</a></li>
-                                <li><a class="dropdown-item @if(request()->is('floors')) active @endif" href="{{ route('floors.index') }}"><i class="bi bi-layers"></i> Floors</a></li>
-                                <li><a class="dropdown-item @if(request()->is('boardrooms')) active @endif" href="{{ route('boardrooms.index') }}"><i class="bi bi-door-open"></i> Boardrooms</a></li>
-                                <li><a class="dropdown-item @if(request()->is('desks')) active @endif" href="{{ route('desks.index') }}"><i class="bi bi-person-workspace"></i> Desks</a></li>
+                                <li><a href="{{ route('campuses.index') }}" class="dropdown-item {{ request()->is('campuses') ? 'active' : '' }}"><i class="bi bi-houses"></i> Campuses</a></li>
+                                <li><a href="{{ route('buildings.index') }}" class="dropdown-item {{ request()->is('buildings') ? 'active' : '' }}"><i class="bi bi-house"></i> Buildings</a></li>
+                                <li><a href="{{ route('floors.index') }}" class="dropdown-item {{ request()->is('floors') ? 'active' : '' }}"><i class="bi bi-layers"></i> Floors</a></li>
+                                <li><a href="{{ route('boardrooms.index') }}" class="dropdown-item {{ request()->is('boardrooms') ? 'active' : '' }}"><i class="bi bi-door-open"></i> Boardrooms</a></li>
+                                <li><a href="{{ route('desks.index') }}" class="dropdown-item {{ request()->is('desks') ? 'active' : '' }}"><i class="bi bi-person-workspace"></i> Desks</a></li>
                             </ul>
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('admin.users.index') }}" class="nav-link @if(request()->is('admin/users')) active @endif"><i class="bi bi-people"></i> Users</a>
+                            <a href="{{ route('admin.users.index') }}"
+                               class="nav-link {{ request()->is('admin/users') ? 'active' : '' }}">
+                                <i class="bi bi-people"></i> Users
+                            </a>
                         </li>
+
                         <li class="nav-item">
-                            <a href="{{ route('bookings.index') }}" class="nav-link @if(request()->is('bookings')) active @endif"><i class="bi bi-calendar-check"></i> Bookings</a>
+                            <a href="{{ route('bookings.index') }}"
+                               class="nav-link {{ request()->is('bookings') ? 'active' : '' }}">
+                                <i class="bi bi-calendar-check"></i> Bookings
+                            </a>
                         </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('availabilities.index') }}"
+                               class="nav-link {{ request()->is('availabilities') ? 'active' : '' }}">
+                                <i class="bi bi-calendar-range"></i> Availabilities
+                            </a>
+                        </li>
+
+                        <!-- REPORTS LINK (ADDED) -->
+                        <li class="nav-item">
+                            <a href="{{ route('admin.reports.index') }}"
+                               class="nav-link {{ request()->is('admin/reports*') ? 'active' : '' }}">
+                                <i class="bi bi-graph-up-arrow"></i> Reports
+                            </a>
+                        </li>
+
                         <li class="nav-item">
                             <a href="{{ route('notifications.index') }}" class="nav-link">
                                 <i class="bi bi-bell"></i> Notifications
                                 @php
-                                    $unreadCount = \App\Models\Notification::where('user_id', auth()->id())->where('is_read', false)->count();
+                                    $unread = \App\Models\Notification::where('user_id', auth()->id())->where('is_read', false)->count();
                                 @endphp
-                                @if($unreadCount > 0)
-                                    <span class="badge bg-danger">{{ $unreadCount }}</span>
+                                @if($unread > 0)
+                                    <span class="badge bg-danger">{{ $unread }}</span>
                                 @endif
                             </a>
                         </li>
+
                     @elseif(auth()->user()->role === 'employee')
+
                         <li class="nav-item">
-                            <a href="{{ route('employee.dashboard') }}" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                            <a href="{{ route('employee.dashboard') }}" class="nav-link">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
                         </li>
+
                         <li class="nav-item">
-                            <a href="{{ route('bookings.create') }}" class="nav-link"><i class="bi bi-plus-circle"></i> Book a Space</a>
+                            <a href="{{ route('bookings.create') }}" class="nav-link">
+                                <i class="bi bi-plus-circle"></i> Book a Space
+                            </a>
                         </li>
+
                         <li class="nav-item">
-                            <a href="{{ route('bookings.index') }}" class="nav-link"><i class="bi bi-calendar-check"></i> My Bookings</a>
+                            <a href="{{ route('bookings.index') }}" class="nav-link">
+                                <i class="bi bi-calendar-check"></i> My Bookings
+                            </a>
                         </li>
+
                         <li class="nav-item">
                             <a href="{{ route('notifications.index') }}" class="nav-link">
                                 <i class="bi bi-bell"></i> Notifications
                                 @php
-                                    $unreadCount = \App\Models\Notification::where('user_id', auth()->id())->where('is_read', false)->count();
+                                    $unread = \App\Models\Notification::where('user_id', auth()->id())->where('is_read', false)->count();
                                 @endphp
-                                @if($unreadCount > 0)
-                                    <span class="badge bg-danger">{{ $unreadCount }}</span>
+                                @if($unread > 0)
+                                    <span class="badge bg-danger">{{ $unread }}</span>
                                 @endif
                             </a>
                         </li>
+
                     @endif
                 @endauth
 
             </ul>
 
             <ul class="navbar-nav">
+
                 @auth
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
                             <i class="bi bi-person-circle"></i> {{ auth()->user()->firstname }} {{ auth()->user()->lastname }}
                         </a>
+
                         <ul class="dropdown-menu dropdown-menu-end">
+
                             <li>
-                                <a class="dropdown-item" href="{{ route('profile.show') }}">
+                                <a href="{{ route('profile.show') }}" class="dropdown-item">
                                     <i class="bi bi-person-badge"></i> Profile
                                 </a>
                             </li>
+
                             <li><hr class="dropdown-divider"></li>
+
                             <li>
-                                <!-- Logout Confirmation -->
-                                <form id="logoutForm" method="POST" action="{{ route('logout') }}">
+                                <form id="logoutForm" action="{{ route('logout') }}" method="POST">
                                     @csrf
                                     <button type="button" class="dropdown-item" onclick="confirmLogout()">
                                         <i class="bi bi-box-arrow-right"></i> Logout
                                     </button>
                                 </form>
                             </li>
+
                         </ul>
                     </li>
                 @endauth
+
             </ul>
+
         </div>
     </div>
 </nav>
 
-<!-- Main Content -->
 <main>
     @yield('content')
 </main>
 
-<!-- Footer -->
 <footer>
     <div class="container text-center">
         <p>&copy; {{ date('Y') }} WorkSpace Hub. All rights reserved.</p>
@@ -209,7 +240,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // SweetAlert Success Message
     @if(session('success'))
     Swal.fire({
         icon: 'success',
@@ -220,24 +250,6 @@
     });
     @endif
 
-    // SweetAlert Delete Confirmation
-    function confirmDelete(formId) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "This action cannot be undone!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById(formId).submit();
-            }
-        });
-    }
-
-    // ✅ SweetAlert Logout Confirmation
     function confirmLogout() {
         Swal.fire({
             title: 'Logout Confirmation',
@@ -248,10 +260,8 @@
             cancelButtonText: 'Cancel',
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('logoutForm').submit();
-            }
+        }).then((res) => {
+            if (res.isConfirmed) document.getElementById('logoutForm').submit();
         });
     }
 </script>
