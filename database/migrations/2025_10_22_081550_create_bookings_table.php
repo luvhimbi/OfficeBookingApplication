@@ -10,8 +10,6 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
-            // Polymorphic relation to desk or boardroom
-            $table->morphs('bookable');
 
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('campus_id')->constrained()->onDelete('cascade');
@@ -21,6 +19,12 @@ return new class extends Migration
             // Flexible space type
             $table->enum('space_type', ['desk', 'boardroom']);
             $table->unsignedBigInteger('space_id');
+
+
+            $table->date('date');
+            $table->time('start_time');
+            $table->time('end_time');
+
             $table->enum('status', ['booked', 'cancelled', 'completed'])->default('booked');
 
             $table->timestamps();

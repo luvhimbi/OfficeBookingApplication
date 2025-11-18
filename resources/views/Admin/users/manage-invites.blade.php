@@ -68,10 +68,16 @@
 
                                     <td class="d-flex gap-2">
 
-                                        <a href="{{ route('admin.invites.create') }}?email={{ $invite->email }}"
-                                           class="btn btn-sm btn-outline-primary rounded-pill">
-                                            <i class="bi bi-arrow-repeat"></i> Resend
-                                        </a>
+                                        {{-- SHOW RESEND BUTTON ONLY IF:
+                                             1. Not used
+                                             2. Not expired
+                                        --}}
+                                        @if(!$invite->used && (!$invite->expires_at || now()->lt($invite->expires_at)))
+                                            <a href="{{ route('admin.invites.create') }}?email={{ $invite->email }}"
+                                               class="btn btn-sm btn-outline-primary rounded-pill">
+                                                <i class="bi bi-arrow-repeat"></i> Resend
+                                            </a>
+                                        @endif
 
                                         <form id="delete-invite-{{ $invite->id }}"
                                               action="{{ route('admin.invites.destroy', $invite->id) }}"

@@ -33,6 +33,9 @@
                         <strong>Building:</strong> {{ $booking->building->name ?? 'N/A' }}
                     </div>
                     <div class="col-md-6">
+                        <strong>Capacity:</strong> {{ $booking->boardroom->capacity ?? 'N/A' }}
+                    </div>
+                    <div class="col-md-6">
                         <strong>Floor:</strong> {{ $booking->floor->name ?? 'N/A' }}
                     </div>
 

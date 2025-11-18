@@ -13,9 +13,6 @@
                         </h3>
                         <p class="text-muted small mb-0">View, manage, and cancel your active bookings</p>
                     </div>
-{{--                    <a href="{{ route('bookings.create') }}" class="btn btn-primary rounded-pill shadow-sm">--}}
-{{--                        <i class="bi bi-plus-circle me-1"></i>Book a Space--}}
-{{--                    </a>--}}
                 </div>
 
                 {{-- Alerts --}}
@@ -39,6 +36,7 @@
                             <th>Campus</th>
                             <th>Building</th>
                             <th>Floor</th>
+                            <th>Date</th>
                             <th>Start Time</th>
                             <th>End Time</th>
                             <th>Status</th>
@@ -55,24 +53,33 @@
                                         {{ $booking->desk->desk_number ?? 'N/A' }}
                                     @elseif($booking->space_type === 'boardroom')
                                         {{ $booking->boardroom->name ?? 'N/A' }}
+                                    @else
+                                        N/A
                                     @endif
                                 </td>
                                 <td>{{ $booking->campus->name ?? 'N/A' }}</td>
                                 <td>{{ $booking->building->name ?? 'N/A' }}</td>
                                 <td>{{ $booking->floor->name ?? 'N/A' }}</td>
-                                <td>{{ \Carbon\Carbon::parse($booking->start_time)->format('d M Y, H:i') }}</td>
-                                <td>{{ \Carbon\Carbon::parse($booking->end_time)->format('d M Y, H:i') }}</td>
+
+                                {{-- Separate Date and Times --}}
+                                <td>{{ \Carbon\Carbon::parse($booking->date)->format('d M Y') }}</td>
+                                <td>{{ $booking->start_time->format('H:i') }}</td>
+                                <td>{{ $booking->end_time->format('H:i') }}</td>
+
+                                {{-- Status --}}
                                 <td>
                                     @if($booking->status === 'booked')
                                         <span class="badge bg-success px-3 py-2 rounded-pill">
-                                            <i class="bi bi-check-circle me-1"></i>Active
-                                        </span>
+                                        <i class="bi bi-check-circle me-1"></i>Booked
+                                    </span>
                                     @else
                                         <span class="badge bg-secondary px-3 py-2 rounded-pill">
-                                            <i class="bi bi-x-circle me-1"></i>Cancelled
-                                        </span>
+                                        <i class="bi bi-x-circle me-1"></i>Cancelled
+                                    </span>
                                     @endif
                                 </td>
+
+                                {{-- Actions --}}
                                 <td>
                                     <a href="{{ route('bookings.show', $booking->id) }}"
                                        class="btn btn-outline-primary btn-sm rounded-pill me-1">
@@ -89,7 +96,7 @@
                                 </td>
                             </tr>
 
-                            {{-- Cancel Confirmation Modal --}}
+                            {{-- Cancel Modal --}}
                             <div class="modal fade" id="cancelModal{{ $booking->id }}" tabindex="-1" aria-labelledby="cancelModalLabel{{ $booking->id }}" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content border-0 shadow">
@@ -103,7 +110,8 @@
                                             <p class="mb-0">
                                                 Are you sure you want to cancel this booking for
                                                 <strong>{{ ucfirst($booking->space_type) }}</strong> on
-                                                <strong>{{ \Carbon\Carbon::parse($booking->start_time)->format('d M Y, H:i') }}</strong>?
+                                                <strong>{{ $booking->start_time->format('d M Y') }}</strong> at
+                                                <strong>{{ $booking->start_time->format('H:i') }}</strong>?
                                             </p>
                                         </div>
                                         <div class="modal-footer">
@@ -121,7 +129,7 @@
                             </div>
                         @empty
                             <tr>
-                                <td colspan="10" class="text-muted py-4">
+                                <td colspan="11" class="text-muted py-4">
                                     <i class="bi bi-inbox fs-4 d-block mb-2"></i>
                                     No bookings found. <br>
                                     <a href="{{ route('bookings.create') }}" class="btn btn-outline-primary btn-sm mt-2">
@@ -142,34 +150,27 @@
         table th, table td {
             vertical-align: middle;
         }
-
         .table thead th {
             font-weight: 600;
             font-size: 0.95rem;
         }
-
         .table td {
             font-size: 0.9rem;
         }
-
         .badge {
             font-size: 0.85rem;
         }
-
         .booking-row:hover {
             background-color: #f9fbff;
             transition: 0.2s ease-in-out;
         }
-
         .btn-outline-primary, .btn-outline-danger {
             border-width: 1.5px;
         }
-
         .btn-outline-primary:hover {
             background-color: #0d6efd;
             color: white;
         }
-
         .btn-outline-danger:hover {
             background-color: #dc3545;
             color: white;

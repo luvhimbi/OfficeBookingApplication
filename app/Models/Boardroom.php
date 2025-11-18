@@ -37,18 +37,6 @@ class Boardroom extends Model
     {
         return $this->belongsTo(Floor::class);
     }
-    /**
-     * Get all availabilities for this desk.
-     */
-    public function availabilities(): MorphMany
-    {
-        return $this->morphMany(Availability::class, 'available');
-    }
-    /**
-     * Get all bookings for this desk.
-     */
-    public function bookings(): MorphMany
-    {
-        return $this->morphMany(Booking::class, 'bookable');
-    }
+
+
 }

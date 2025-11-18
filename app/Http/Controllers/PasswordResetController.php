@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Services\PasswordResetService;
 
@@ -24,13 +25,19 @@ class PasswordResetController extends Controller
     public function sendResetLink(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:users,email'
+            'email' => 'required|email',
         ]);
 
-        $this->resetService->sendResetLink($request->email);
 
-        return back()->with('success', 'Password reset link sent to your email.');
+        $user = User::where('email', $request->email)->first();
+        if ($user) {
+            $this->resetService->sendResetLink($user->email);
+        }
+
+        // Always return the same response to prevent account enumeration
+        return back()->with('success', 'If an account exists with this email, a password reset link has been sent.');
     }
+
 
     // Show reset password form
     public function resetForm($token)
@@ -54,4 +61,6 @@ class PasswordResetController extends Controller
 
         return redirect()->route('login')->with('success', 'Password reset successfully.');
     }
+
+
 }

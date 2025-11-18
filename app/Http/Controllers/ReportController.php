@@ -21,7 +21,7 @@ class ReportController extends Controller
 
     public function userReports(Request $request)
     {
-        $filters = $request->only(['role','from','to']);
+        $filters = $request->only(['role', 'from', 'to']);
         $data = $this->reportService->userReports($filters);
 
         return view('admin.reports.users', $data);
@@ -29,15 +29,16 @@ class ReportController extends Controller
 
     public function inviteReports(Request $request)
     {
-        $filters = $request->only(['status','from','to']);
+        $filters = $request->only(['status', 'from', 'to']);
         $data = $this->reportService->inviteReports($filters);
 
         return view('admin.reports.invites', $data);
     }
 
-    public function bookings()
+    public function bookings(Request $request)
     {
-        $data = $this->reportService->bookingReports();
+        $data = $this->reportService->bookingReports($request->only(['status','from','to']));
         return view('admin.reports.bookings', $data);
     }
+
 }

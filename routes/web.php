@@ -95,8 +95,6 @@ Route::middleware(['auth'])->group(function () {
     // Desk Management Routes (Admin Only)
     Route::resource('desks', \App\Http\Controllers\DeskController::class)
         ->middleware(['auth']);
-         Route::resource('availabilities', AvailabilityController::class);
-
 
     // Ajax routes for dynamic dropdowns
     Route::get('/bookings/get-buildings/{campus}', [BookingController::class, 'getBuildings'])->name('bookings.getBuildings');

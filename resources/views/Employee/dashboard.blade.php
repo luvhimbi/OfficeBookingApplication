@@ -138,6 +138,7 @@
                                         <th>Building</th>
                                         <th>Floor</th>
                                         <th>Space Type</th>
+                                        <th>Booking Date</th>
                                         <th>Start Time</th>
                                         <th>End Time</th>
                                         <th>Status</th>
@@ -150,13 +151,20 @@
                                             <td>{{ $booking->campus->name ?? 'N/A' }}</td>
                                             <td>{{ $booking->building->name ?? 'N/A' }}</td>
                                             <td>{{ $booking->floor->name ?? 'N/A' }}</td>
-                                            <td>{{ ucfirst($booking->space_type) }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($booking->start_time)->format('d M Y, H:i') }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($booking->end_time)->format('d M Y, H:i') }}</td>
                                             <td>
-                                                <span class="badge badge-status badge-{{ $booking->status }}">
-                                                    {{ ucfirst($booking->status) }}
-                                                </span>
+                                                {{ $booking->space_type === 'desk'
+                                                    ? $booking->desk->desk_number ?? 'N/A'
+                                                    : ($booking->boardroom->name ?? 'N/A')
+                                                }}
+                                            </td>
+                                            <td>{{ \Carbon\Carbon::parse($booking->date)->format('d M Y') }}</td>
+                                            <td>{{ $booking->start_time->format('H:i') }}</td>
+                                            <td>{{ $booking->end_time->format('H:i') }}</td>
+
+                                            <td>
+                            <span class="badge badge-status badge-{{ $booking->status }}">
+                                {{ ucfirst($booking->status) }}
+                            </span>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -179,7 +187,8 @@
                                         <th>Campus</th>
                                         <th>Building</th>
                                         <th>Floor</th>
-                                        <th>Space Type</th>
+                                        <th>Resource Number/Name</th>
+                                        <th>Booking Date</th>
                                         <th>Start Time</th>
                                         <th>End Time</th>
                                         <th>Status</th>
@@ -192,13 +201,24 @@
                                             <td>{{ $booking->campus->name ?? 'N/A' }}</td>
                                             <td>{{ $booking->building->name ?? 'N/A' }}</td>
                                             <td>{{ $booking->floor->name ?? 'N/A' }}</td>
-                                            <td>{{ ucfirst($booking->space_type) }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($booking->start_time)->format('d M Y, H:i') }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($booking->end_time)->format('d M Y, H:i') }}</td>
+
+                                            {{-- Resource --}}
                                             <td>
-                                                <span class="badge badge-status badge-{{ $booking->status }}">
-                                                    {{ ucfirst($booking->status) }}
-                                                </span>
+                                                {{ $booking->space_type === 'desk'
+                                                    ? $booking->desk->desk_number ?? 'N/A'
+                                                    : ($booking->boardroom->name ?? 'N/A')
+                                                }}
+                                            </td>
+
+                                            <td>{{ \Carbon\Carbon::parse($booking->date)->format('d M Y') }}</td>
+                                            <td>{{ $booking->start_time->format('H:i') }}</td>
+                                            <td>{{ $booking->end_time->format('H:i') }}</td>
+
+
+                                            <td>
+                            <span class="badge badge-status badge-{{ $booking->status }}">
+                                {{ ucfirst($booking->status) }}
+                            </span>
                                             </td>
                                         </tr>
                                     @endforeach

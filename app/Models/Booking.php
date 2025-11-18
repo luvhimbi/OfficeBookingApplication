@@ -11,13 +11,14 @@ class Booking extends Model
 
     protected $fillable = [
         'user_id',
-        'availability_id',
         'campus_id',
         'building_id',
         'floor_id',
         'space_type',
         'space_id',
-        'booking_date',
+        'date',
+        'start_time',
+        'end_time',
         'status',
 
     ];
@@ -27,12 +28,12 @@ class Booking extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function casts(): array
-    {
-        return [
-            'booking_date' => 'date',
-        ];
-    }
+    protected $casts = [
+        'date' => 'date:Y-m-d',
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
+    ];
+
 
     public function campus()
     {
@@ -48,22 +49,20 @@ class Booking extends Model
     {
         return $this->belongsTo(Floor::class);
     }
-    public function boardroom()
+    public function desk() { return $this->belongsTo(Desk::class, 'space_id'); }
+    public function boardroom() { return $this->belongsTo(Boardroom::class, 'space_id'); }
+
+
+    // Optional: dynamic accessor to get the correct space
+    public function getSpaceAttribute()
     {
-        return $this->belongsTo(Boardroom::class);
-    }
-    public function desk()
-    {
-        return $this->belongsTo(Desk::class);
+        if ($this->space_type === 'desk') {
+            return $this->desk;
+        } elseif ($this->space_type === 'boardroom') {
+            return $this->boardroom;
+        }
+        return null;
     }
 
-    protected $casts = [
-        'start_time' => 'datetime',
-        'end_time' => 'datetime'
-    ];
 
-    public function space()
-    {
-        return $this->morphTo(__FUNCTION__, 'space_type', 'space_id');
-    }
 }

@@ -3,7 +3,7 @@
 @section('title', 'Book a Space')
 
 @section('content')
-    <div class="container ">
+    <div class="container">
         <div class="card border-0 p-4">
             <div class="d-flex align-items-center mb-4 justify-content-between">
                 <div class="d-flex align-items-center">
@@ -11,13 +11,9 @@
                     <h3 class="mb-0 fw-bold">Book a Space</h3>
                 </div>
 
-                {{-- Calendar View Button --}}
-                <a href="{{ route('bookings.calendar') }}" class="btn btn-outline-primary">
-                    <i class="bi bi-calendar3 me-1"></i> Calendar View
-                </a>
             </div>
 
-            {{-- Error Alert --}}
+            {{-- Error Messages --}}
             @if($errors->any())
                 <div class="alert alert-danger rounded-3">
                     <ul class="mb-0 ps-3">
@@ -35,7 +31,6 @@
                 </div>
             @endif
 
-            {{-- Booking Form --}}
             <form action="{{ route('bookings.store') }}" method="POST" id="bookingForm" class="needs-validation" novalidate>
                 @csrf
 
@@ -110,9 +105,19 @@
                         <i class="bi bi-clock-history me-2"></i> Step 6: Select Date & Time
                     </h5>
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="date"
+                                   class="form-control"
+                                   id="date"
+                                   name="date"
+                                   value="{{ old('date') }}"
+                                   required>
+                            <div class="invalid-feedback">Please select a date.</div>
+                        </div>
+                        <div class="col-md-4">
                             <label for="start_time" class="form-label">Start Time</label>
-                            <input type="datetime-local"
+                            <input type="time"
                                    class="form-control"
                                    id="start_time"
                                    name="start_time"
@@ -120,9 +125,9 @@
                                    required>
                             <div class="invalid-feedback">Please select a start time.</div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="end_time" class="form-label">End Time</label>
-                            <input type="datetime-local"
+                            <input type="time"
                                    class="form-control"
                                    id="end_time"
                                    name="end_time"
@@ -142,6 +147,7 @@
             </form>
         </div>
     </div>
+
 @endsection
 @push('scripts')
     <script src="{{ asset('js/booking-form.js') }}"></script>

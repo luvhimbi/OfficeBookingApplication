@@ -92,13 +92,121 @@ class ReportService
     /**
      * Get booking report data.
      */
-    public function bookingReports()
+    public function bookingReports(array $filters = [], int $perPage = 10)
     {
-        $totalBookings = Booking::count();
-        $upcoming = Booking::where('booking_date', '>=', Carbon::today())->count();
-        $cancelled = Booking::where('status', 'cancelled')->count();
-        $recentBookings = Booking::latest()->take(10)->get();
+        $query = Booking::query()
+            ->with(['user','campus','building','floor','boardroom','desk']);
 
-        return compact('totalBookings','upcoming','cancelled','recentBookings');
+        // Filters
+        if (!empty($filters['status'])) {
+            if ($filters['status'] === 'upcoming') {
+                $query->where('date', '>=', now()->toDateString());
+            } elseif ($filters['status'] === 'cancelled') {
+                $query->where('status', 'cancelled');
+            } else {
+                $query->where('status', $filters['status']);
+            }
+        }
+
+        if (!empty($filters['from'])) {
+            $query->whereDate('date', '>=', $filters['from']);
+        }
+
+        if (!empty($filters['to'])) {
+            $query->whereDate('date', '<=', $filters['to']);
+        }
+
+        // Paginate recent bookings
+        $recentBookings = $query->orderBy('date', 'desc')->paginate($perPage);
+
+        // Basic stats
+        $totalBookings = Booking::count();
+        $upcoming = Booking::where('date', '>=', now()->toDateString())->count();
+        $cancelled = Booking::where('status', 'cancelled')->count();
+        $todayBookings = Booking::whereDate('date', now()->toDateString())->count();
+
+        // Chart: last 7 days
+        $chartLabels = [];
+        $chartData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $day = now()->subDays($i)->toDateString();
+            $chartLabels[] = $day;
+            $chartData[] = Booking::whereDate('date', $day)->count();
+        }
+
+        // Top campuses (top 5)
+        $topCampuses = Booking::selectRaw('campus_id, COUNT(*) as total')
+            ->whereNotNull('campus_id')
+            ->groupBy('campus_id')
+            ->orderByDesc('total')
+            ->take(5)
+            ->get();
+        // eager-load campus relationship on each Booking model instance (if present)
+        $topCampuses->load('campus');
+
+        // Top space types (desk vs boardroom)
+        $topSpaceTypes = Booking::selectRaw('space_type, COUNT(*) AS total')
+            ->groupBy('space_type')
+            ->orderByDesc('total')
+            ->get();
+
+        // Peak hours (Postgres)
+        $peakHours = Booking::selectRaw('EXTRACT(HOUR FROM start_time) AS hour, COUNT(*) AS total')
+            ->groupByRaw('EXTRACT(HOUR FROM start_time)')
+            ->orderByRaw('hour')
+            ->get()
+            ->map(function ($row) {
+                // ensure hour is integer for frontend charts
+                $row->hour = (int) $row->hour;
+                return $row;
+            });
+
+        // Monthly trends (year-month, last 12 months)
+        $monthlyTrends = Booking::selectRaw("
+            EXTRACT(YEAR FROM date) AS year,
+            EXTRACT(MONTH FROM date) AS month,
+            COUNT(*) AS total
+        ")
+            ->groupByRaw('EXTRACT(YEAR FROM date), EXTRACT(MONTH FROM date)')
+            ->orderByRaw('year ASC, month ASC')
+            ->get()
+            ->map(function ($row) {
+                // normalize label to YYYY-MM for charts
+                $y = (int) $row->year;
+                $m = str_pad((int)$row->month, 2, '0', STR_PAD_LEFT);
+                $row->month_label = "{$y}-{$m}";
+                return $row;
+            });
+
+        // User ranking (top 10) — ensure the collection items are Booking model-like so we can eager load user
+        $userRanking = Booking::selectRaw('user_id, COUNT(*) AS total')
+            ->whereNotNull('user_id')
+            ->groupBy('user_id')
+            ->orderByDesc('total')
+            ->take(10)
+            ->get();
+
+        // Eager-load the user relation for each aggregated row so blade can do $u->user->firstname
+        // This works because the returned items are Booking model instances (with an extra "total" attribute).
+        $userRanking->load('user');
+
+        // Return everything Blade expects
+        return compact(
+            'recentBookings',
+            'totalBookings',
+            'upcoming',
+            'cancelled',
+            'todayBookings',
+            'chartLabels',
+            'chartData',
+            'topCampuses',
+            'topSpaceTypes',
+            'peakHours',
+            'monthlyTrends',
+            'userRanking'
+        );
     }
+
+
+
 }

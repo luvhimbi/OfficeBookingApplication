@@ -127,14 +127,6 @@
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('availabilities.index') }}"
-                               class="nav-link {{ request()->is('availabilities') ? 'active' : '' }}">
-                                <i class="bi bi-calendar-range"></i> Availabilities
-                            </a>
-                        </li>
-
-                        <!-- REPORTS LINK (ADDED) -->
-                        <li class="nav-item">
                             <a href="{{ route('admin.reports.index') }}"
                                class="nav-link {{ request()->is('admin/reports*') ? 'active' : '' }}">
                                 <i class="bi bi-graph-up-arrow"></i> Reports

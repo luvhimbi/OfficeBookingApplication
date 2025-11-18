@@ -10,8 +10,10 @@ use App\Models\Desk;
 use App\Models\Floor;
 use App\Services\EmailService;
 use App\Services\NotificationService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
@@ -25,9 +27,27 @@ class BookingController extends Controller
     }
     public function index()
     {
-        $bookings = Booking::with(['user', 'campus', 'building', 'boardroom' ,'floor'])
+
+
+
+        $bookings = Booking::with(['user', 'campus', 'building', 'floor', 'desk', 'boardroom'])
             ->latest()
             ->get();
+
+        // Optional debug logging
+        foreach ($bookings as $booking) {
+            $spaceName = $booking->space_type === 'desk'
+                ? ($booking->desk->desk_number ?? 'N/A')
+                : ($booking->boardroom->name ?? 'N/A');
+
+            \Log::info("Booking {$booking->id} space:", [
+                'space_type' => $booking->space_type,
+                'space_name' => $spaceName
+            ]);
+        }
+
+
+
 
         return view('Employee.bookings.index', compact('bookings'));
     }
@@ -68,46 +88,8 @@ class BookingController extends Controller
         }
     }
 
-    public function calendarView()
-    {
-        $bookings = \App\Models\Booking::with(['desk', 'boardroom', 'user'])
-            ->where('status', 'booked')
-            ->get();
 
-        $events = $bookings->map(function($booking) {
-            $title = $booking->space_type === 'desk'
-                ? 'Desk: ' . ($booking->desk->desk_number ?? 'N/A')
-                : 'Boardroom: ' . ($booking->boardroom->name ?? 'N/A');
 
-            $title .= ' (' . $booking->user->firstname . ' ' . $booking->user->lastname . ')';
-
-            // Ensure proper date/time format
-            $startDateTime = $booking->date . 'T' . $this->formatTime($booking->start_time);
-            $endDateTime = $booking->date . 'T' . $this->formatTime($booking->end_time);
-
-            return [
-                'title' => $title,
-                'start' => $startDateTime,
-                'end' => $endDateTime,
-                'color' => $booking->space_type === 'desk' ? '#4e73df' : '#1cc88a',
-                'allDay' => false, // Explicitly set to false for timed events
-            ];
-        });
-
-        return view('Employee.bookings.calendar', compact('events'));
-    }
-
-// Helper method to format time
-    private function formatTime($time)
-    {
-        // If time is already in correct format, return as is
-        if (preg_match('/^\d{2}:\d{2}:\d{2}$/', $time)) {
-            return $time;
-        }
-
-        // If time is in 12-hour format, convert to 24-hour
-        return date('H:i:s', strtotime($time));
-    }
 
     /**
      * Get floors for a specific building (AJAX)
@@ -163,7 +145,8 @@ class BookingController extends Controller
     }
 
 
-    // Store booking
+
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -171,34 +154,37 @@ class BookingController extends Controller
             'building_id' => 'required|exists:buildings,id',
             'floor_id' => 'required|exists:floors,id',
             'space_type' => 'required|in:desk,boardroom',
-            'space_id' => 'required', // will validate below
-            'start_time' => 'required|date|after:now',
-            'end_time' => 'required|date|after:start_time',
+            'space_id' => 'required',
+            'date' => 'required|date|after_or_equal:today',
+            'start_time' => 'required',
+            'end_time' => 'required|after:start_time',
         ]);
 
+        // Combine date + time for DB comparison
+        $startDateTime = Carbon::parse($validated['date'] . ' ' . $validated['start_time']);
+        $endDateTime = Carbon::parse($validated['date'] . ' ' . $validated['end_time']);
+
         // Check if space exists
-        if ($validated['space_type'] === 'desk') {
-            $space = Desk::where('id', $validated['space_id'])->firstOrFail();
-        } else {
-            $space = Boardroom::where('id', $validated['space_id'])->firstOrFail();
-        }
+        $spaceModel = $validated['space_type'] === 'desk' ? Desk::class : Boardroom::class;
+        $space = $spaceModel::findOrFail($validated['space_id']);
 
         // Prevent overlapping bookings
         $conflict = Booking::where('space_type', $validated['space_type'])
             ->where('space_id', $validated['space_id'])
-            ->where(function($q) use ($validated) {
-                $q->whereBetween('start_time', [$validated['start_time'], $validated['end_time']])
-                    ->orWhereBetween('end_time', [$validated['start_time'], $validated['end_time']])
-                    ->orWhere(function($query) use ($validated){
-                        $query->where('start_time', '<=', $validated['start_time'])
-                            ->where('end_time', '>=', $validated['end_time']);
-                    });
-            })->exists();
+            ->whereDate('date', $validated['date'])
+            ->where(function($q) use ($startDateTime, $endDateTime) {
+                $q->where(function($query) use ($startDateTime, $endDateTime) {
+                    $query->where('start_time', '<', $endDateTime->format('H:i'))
+                        ->where('end_time', '>', $startDateTime->format('H:i'));
+                });
+            })
+            ->exists();
 
         if ($conflict) {
             return back()->withErrors(['space_id' => 'This space is already booked for the selected time.'])->withInput();
         }
 
+        // Create booking
         $booking = Booking::create([
             'user_id' => Auth::id(),
             'campus_id' => $validated['campus_id'],
@@ -206,11 +192,13 @@ class BookingController extends Controller
             'floor_id' => $validated['floor_id'],
             'space_type' => $validated['space_type'],
             'space_id' => $validated['space_id'],
+            'date' => $validated['date'],
             'start_time' => $validated['start_time'],
             'end_time' => $validated['end_time'],
             'status' => 'booked',
         ]);
 
+        // Notifications
         $this->emailService->sendBookingConfirmation($booking);
         $this->notificationService->createNotification(
             $booking->user_id,
@@ -218,8 +206,10 @@ class BookingController extends Controller
             "Your booking for {$booking->space_type} on {$booking->date} from {$booking->start_time} to {$booking->end_time} is confirmed.",
             'success'
         );
+
         return redirect()->route('bookings.index')->with('success', 'Booking created successfully!');
     }
+
 
     public function cancel($id)
     {

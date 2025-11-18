@@ -16,18 +16,25 @@ class DashboardController extends Controller
 
         // Get all bookings for logged-in user
         $bookings = Booking::where('user_id', $user->id)
-            ->with(['campus', 'building', 'floor'])
+            ->with(['campus', 'building', 'floor','desk','boardroom'])
             ->orderBy('start_time', 'desc')
             ->get();
 
         // Separate upcoming and past bookings
         $upcomingBookings = $bookings->filter(function ($booking) {
-            return Carbon::parse($booking->end_time)->isFuture();
+            $start = Carbon::parse($booking->date)
+                ->setTimeFromTimeString($booking->start_time);
+
+            return $start->isFuture();
         });
 
         $pastBookings = $bookings->filter(function ($booking) {
-            return Carbon::parse($booking->end_time)->isPast();
+            $end = Carbon::parse($booking->date)
+                ->setTimeFromTimeString($booking->end_time);
+
+            return $end->isPast();
         });
+
 
         // Suggested favorite spaces with count
         $favoriteSpaces = Booking::select('campus_id', 'building_id', 'floor_id', 'space_type', DB::raw('COUNT(*) as booked_count'))
