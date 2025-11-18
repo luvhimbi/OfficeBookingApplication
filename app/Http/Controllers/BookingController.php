@@ -27,12 +27,15 @@ class BookingController extends Controller
     }
     public function index()
     {
+        $query = Booking::with(['user', 'campus', 'building', 'floor', 'desk', 'boardroom'])
+            ->latest();
 
+        // If the logged-in user is NOT admin, show only their bookings
+        if (auth()->user()->role !== 'admin') {
+            $query->where('user_id', auth()->id());
+        }
 
-
-        $bookings = Booking::with(['user', 'campus', 'building', 'floor', 'desk', 'boardroom'])
-            ->latest()
-            ->get();
+        $bookings = $query->get();
 
         // Optional debug logging
         foreach ($bookings as $booking) {
@@ -46,11 +49,9 @@ class BookingController extends Controller
             ]);
         }
 
-
-
-
         return view('Employee.bookings.index', compact('bookings'));
     }
+
 
     public function show(Booking $booking)
     {

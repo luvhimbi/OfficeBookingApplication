@@ -22,6 +22,7 @@ class DashboardController extends Controller
 
         // Separate upcoming and past bookings
         $upcomingBookings = $bookings->filter(function ($booking) {
+
             $start = Carbon::parse($booking->date)
                 ->setTimeFromTimeString($booking->start_time);
 

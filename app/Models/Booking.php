@@ -30,11 +30,9 @@ class Booking extends Model
 
     protected $casts = [
         'date' => 'date:Y-m-d',
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
+        'start_time' => 'string',
+        'end_time' => 'string',
     ];
-
-
     public function campus()
     {
         return $this->belongsTo(Campus::class);

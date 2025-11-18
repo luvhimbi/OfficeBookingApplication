@@ -31,6 +31,12 @@
                         <thead class="table-light text-muted">
                         <tr>
                             <th>#</th>
+
+                            {{-- Admin sees who booked the item --}}
+                            @if(auth()->user()->role === 'admin')
+                                <th>Booked By</th>
+                            @endif
+
                             <th>Space Type</th>
                             <th>Space Name/Number</th>
                             <th>Campus</th>
@@ -43,11 +49,19 @@
                             <th>Actions</th>
                         </tr>
                         </thead>
+
                         <tbody>
                         @forelse($bookings as $booking)
                             <tr class="booking-row {{ $booking->status === 'cancelled' ? 'table-light' : '' }}">
                                 <td>{{ $loop->iteration }}</td>
+
+                                {{-- Admin-only: show user name --}}
+                                @if(auth()->user()->role === 'admin')
+                                    <td>{{ $booking->user->firstname?? 'Unknown User' }}</td>
+                                @endif
+
                                 <td class="text-capitalize">{{ $booking->space_type }}</td>
+
                                 <td>
                                     @if($booking->space_type === 'desk')
                                         {{ $booking->desk->desk_number ?? 'N/A' }}
@@ -57,25 +71,26 @@
                                         N/A
                                     @endif
                                 </td>
+
                                 <td>{{ $booking->campus->name ?? 'N/A' }}</td>
                                 <td>{{ $booking->building->name ?? 'N/A' }}</td>
                                 <td>{{ $booking->floor->name ?? 'N/A' }}</td>
 
-                                {{-- Separate Date and Times --}}
+                                {{-- Date + Times --}}
                                 <td>{{ \Carbon\Carbon::parse($booking->date)->format('d M Y') }}</td>
-                                <td>{{ $booking->start_time->format('H:i') }}</td>
-                                <td>{{ $booking->end_time->format('H:i') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($booking->end_time)->format('H:i') }}</td>
 
                                 {{-- Status --}}
                                 <td>
                                     @if($booking->status === 'booked')
                                         <span class="badge bg-success px-3 py-2 rounded-pill">
-                                        <i class="bi bi-check-circle me-1"></i>Booked
-                                    </span>
+                                            <i class="bi bi-check-circle me-1"></i>Booked
+                                        </span>
                                     @else
                                         <span class="badge bg-secondary px-3 py-2 rounded-pill">
-                                        <i class="bi bi-x-circle me-1"></i>Cancelled
-                                    </span>
+                                            <i class="bi bi-x-circle me-1"></i>Cancelled
+                                        </span>
                                     @endif
                                 </td>
 
@@ -97,26 +112,31 @@
                             </tr>
 
                             {{-- Cancel Modal --}}
-                            <div class="modal fade" id="cancelModal{{ $booking->id }}" tabindex="-1" aria-labelledby="cancelModalLabel{{ $booking->id }}" aria-hidden="true">
+                            <div class="modal fade" id="cancelModal{{ $booking->id }}" tabindex="-1"
+                                 aria-labelledby="cancelModalLabel{{ $booking->id }}" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content border-0 shadow">
                                         <div class="modal-header bg-danger text-white">
                                             <h5 class="modal-title" id="cancelModalLabel{{ $booking->id }}">
                                                 <i class="bi bi-exclamation-triangle me-2"></i>Cancel Booking
                                             </h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
                                             <p class="mb-0">
                                                 Are you sure you want to cancel this booking for
                                                 <strong>{{ ucfirst($booking->space_type) }}</strong> on
-                                                <strong>{{ $booking->start_time->format('d M Y') }}</strong> at
-                                                <strong>{{ $booking->start_time->format('H:i') }}</strong>?
+                                                <strong>{{ \Carbon\Carbon::parse($booking->date)->format('d M Y') }}</strong> at
+                                                <strong>{{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }}</strong>?
                                             </p>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">No, Keep It</button>
-                                            <form action="{{ route('bookings.cancel', $booking->id) }}" method="POST" class="d-inline">
+                                            <button type="button" class="btn btn-secondary rounded-pill"
+                                                    data-bs-dismiss="modal">No, Keep It</button>
+
+                                            <form action="{{ route('bookings.cancel', $booking->id) }}" method="POST"
+                                                  class="d-inline">
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit" class="btn btn-danger rounded-pill">
@@ -127,9 +147,10 @@
                                     </div>
                                 </div>
                             </div>
+
                         @empty
                             <tr>
-                                <td colspan="11" class="text-muted py-4">
+                                <td colspan="12" class="text-muted py-4">
                                     <i class="bi bi-inbox fs-4 d-block mb-2"></i>
                                     No bookings found. <br>
                                     <a href="{{ route('bookings.create') }}" class="btn btn-outline-primary btn-sm mt-2">

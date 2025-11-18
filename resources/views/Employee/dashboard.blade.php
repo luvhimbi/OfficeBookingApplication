@@ -157,9 +157,10 @@
                                                     : ($booking->boardroom->name ?? 'N/A')
                                                 }}
                                             </td>
-                                            <td>{{ \Carbon\Carbon::parse($booking->date)->format('d M Y') }}</td>
-                                            <td>{{ $booking->start_time->format('H:i') }}</td>
-                                            <td>{{ $booking->end_time->format('H:i') }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($booking->date)->format('Y-m-d') }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($booking->end_time)->format('H:i') }}</td>
+
 
                                             <td>
                             <span class="badge badge-status badge-{{ $booking->status }}">
