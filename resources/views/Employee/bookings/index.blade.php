@@ -126,8 +126,14 @@
                                         <div class="modal-body">
                                             <p class="mb-0">
                                                 Are you sure you want to cancel this booking for
-                                                <strong>{{ ucfirst($booking->space_type) }}</strong> on
-                                                <strong>{{ \Carbon\Carbon::parse($booking->date)->format('d M Y') }}</strong> at
+                                                <strong>
+                                                    @if($booking->space_type === 'desk')
+                                                        Desk {{ $booking->desk->desk_number ?? 'N/A' }}
+                                                    @else
+                                                        Boardroom {{ $booking->boardroom->name ?? 'N/A' }}
+                                                    @endif
+                                                </strong>
+                                                on <strong>{{ \Carbon\Carbon::parse($booking->date)->format('d M Y') }}</strong> at
                                                 <strong>{{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }}</strong>?
                                             </p>
                                         </div>

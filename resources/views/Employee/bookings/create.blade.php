@@ -137,6 +137,10 @@
                         </div>
                     </div>
                 </div>
+                <div class="mt-3" id="slotSuggestionWrapper" style="display:none;">
+                    <h6 class="fw-bold">Available Time Slots</h6>
+                    <div id="slotSuggestions" class="d-flex flex-wrap gap-2"></div>
+                </div>
 
                 {{-- Submit Button --}}
                 <div class="d-grid mt-4">
@@ -151,115 +155,11 @@
 @endsection
 @push('scripts')
     <script src="{{ asset('js/booking-form.js') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM fully loaded');
+    <script src="{{ asset('js/autoPopulateBooking.js') }}"></script>
+    <script src="{{ asset('js/DisplayingPopUps.js') }}"></script>
 
-            // Function to get URL parameters
-            function getUrlParameter(name) {
-                const urlParams = new URLSearchParams(window.location.search);
-                return urlParams.get(name);
-            }
 
-            // Get parameters from URL
-            const campusId = getUrlParameter('campus_id');
-            const buildingId = getUrlParameter('building_id');
-            const floorId = getUrlParameter('floor_id');
-            const spaceType = getUrlParameter('space_type');
 
-            console.log('URL Parameters:', { campusId, buildingId, floorId, spaceType });
 
-            // Function to wait for element to be available
-            function waitForElement(selector, callback, maxAttempts = 10, interval = 500) {
-                let attempts = 0;
-                const checkElement = () => {
-                    attempts++;
-                    const element = document.querySelector(selector);
-                    if (element) {
-                        console.log(`Element found: ${selector}`);
-                        callback(element);
-                    } else if (attempts < maxAttempts) {
-                        console.log(`Waiting for element: ${selector} (attempt ${attempts})`);
-                        setTimeout(checkElement, interval);
-                    } else {
-                        console.error(`Element not found: ${selector} after ${maxAttempts} attempts`);
-                    }
-                };
-                checkElement();
-            }
 
-            // Function to trigger change event with retry
-            function triggerChange(element, callback, retries = 3, delay = 500) {
-                if (!element) {
-                    console.error('Element is null');
-                    return;
-                }
-
-                const event = new Event('change', { bubbles: true });
-                element.dispatchEvent(event);
-                console.log(`Change event triggered for:`, element);
-
-                if (callback && retries > 0) {
-                    setTimeout(() => {
-                        if (!callback()) {
-                            console.log(`Retrying change event for:`, element);
-                            triggerChange(element, callback, retries - 1, delay);
-                        }
-                    }, delay);
-                }
-            }
-
-            // If we have a campus ID, start the auto-population process
-            if (campusId) {
-                console.log('Starting auto-population with campus ID:', campusId);
-
-                // Wait for campus select to be available
-                waitForElement('#campus_id', (campusSelect) => {
-                    console.log('Setting campus:', campusId);
-                    campusSelect.value = campusId;
-
-                    // Trigger change event for campus
-                    triggerChange(campusSelect, () => {
-                        // After campus loads, set building if available
-                        if (buildingId) {
-                            setTimeout(() => {
-                                waitForElement('#building_id', (buildingSelect) => {
-                                    console.log('Setting building:', buildingId);
-                                    buildingSelect.value = buildingId;
-
-                                    // Trigger change event for building
-                                    triggerChange(buildingSelect, () => {
-                                        // After building loads, set floor if available
-                                        if (floorId) {
-                                            setTimeout(() => {
-                                                waitForElement('#floor_id', (floorSelect) => {
-                                                    console.log('Setting floor:', floorId);
-                                                    floorSelect.value = floorId;
-
-                                                    // Trigger change event for floor
-                                                    triggerChange(floorSelect, () => {
-                                                        // Finally, set space type if available
-                                                        if (spaceType) {
-                                                            setTimeout(() => {
-                                                                waitForElement('#space_type', (typeSelect) => {
-                                                                    console.log('Setting space type:', spaceType);
-                                                                    typeSelect.value = spaceType;
-                                                                    const typeEvent = new Event('change', { bubbles: true });
-                                                                    typeSelect.dispatchEvent(typeEvent);
-                                                                });
-                                                            }, 1000);
-                                                        }
-                                                    });
-                                                });
-                                            }, 1500);
-                                        }
-                                    });
-                                });
-                            }, 1500);
-                        }
-                    });
-                });
-            }
-        });
-    </script>
 @endpush

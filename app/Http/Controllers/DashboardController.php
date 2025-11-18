@@ -38,9 +38,9 @@ class DashboardController extends Controller
 
 
         // Suggested favorite spaces with count
-        $favoriteSpaces = Booking::select('campus_id', 'building_id', 'floor_id', 'space_type', DB::raw('COUNT(*) as booked_count'))
+        $favoriteSpaces = Booking::select('campus_id', 'building_id', 'floor_id', 'space_type','space_id', DB::raw('COUNT(*) as booked_count'))
             ->where('user_id', $user->id)
-            ->groupBy('campus_id', 'building_id', 'floor_id', 'space_type')
+            ->groupBy('campus_id', 'building_id', 'floor_id', 'space_type','space_id')
             ->orderByDesc('booked_count')
             ->limit(5)
             ->with(['campus', 'building', 'floor'])

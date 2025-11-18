@@ -87,7 +87,9 @@
                                             'campus_id' => $space->campus_id,
                                             'building_id' => $space->building_id,
                                             'floor_id' => $space->floor_id,
-                                            'space_type' => $space->space_type
+                                            'space_type' => $space->space_type,
+                                            'space_id' => $space->space_id,
+
                                         ]) }}"
                                            class="btn btn-primary mt-auto">
                                             Book Again
@@ -161,7 +163,6 @@
                                             <td>{{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }}</td>
                                             <td>{{ \Carbon\Carbon::parse($booking->end_time)->format('H:i') }}</td>
 
-
                                             <td>
                             <span class="badge badge-status badge-{{ $booking->status }}">
                                 {{ ucfirst($booking->status) }}
@@ -211,9 +212,9 @@
                                                 }}
                                             </td>
 
-                                            <td>{{ \Carbon\Carbon::parse($booking->date)->format('d M Y') }}</td>
-                                            <td>{{ $booking->start_time->format('H:i') }}</td>
-                                            <td>{{ $booking->end_time->format('H:i') }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($booking->date)->format('Y-m-d') }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($booking->end_time)->format('H:i') }}</td>
 
 
                                             <td>
@@ -233,6 +234,21 @@
             </div>
         </div>
     </div>
+    <style>
+        /* Hover effect for cards */
+        .hover-shadow:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Smooth transition for button hover */
+        .btn-outline-primary:hover {
+            background-color: #0d6efd;
+            color: #fff;
+            transition: all 0.3s ease-in-out;
+        }
+    </style>
 
     @push('scripts')
         <script>

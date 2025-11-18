@@ -204,13 +204,77 @@ class BookingController extends Controller
         $this->notificationService->createNotification(
             $booking->user_id,
             'Booking Confirmed',
-            "Your booking for {$booking->space_type} on {$booking->date} from {$booking->start_time} to {$booking->end_time} is confirmed.",
+            "Your booking for {$booking->space_type} on " . Carbon::parse($booking->date)->format('Y-m-d') .
+            " from {$booking->start_time} to {$booking->end_time} is confirmed.",
             'success'
         );
 
         return redirect()->route('bookings.index')->with('success', 'Booking created successfully!');
     }
+    public function availability(Request $request)
+    {
+        $request->validate([
+            'space_id' => 'required|integer',
+            'date' => 'required|date'
+        ]);
 
+        $spaceId = $request->space_id;
+        $date = $request->date;
+
+        // fetch all existing bookings for that space + date
+        $bookings = Booking::where('space_id', $spaceId)
+            ->where('date', $date)
+            ->orderBy('start_time')
+            ->get(['start_time', 'end_time']);
+
+        // convert them to time ranges
+        $taken = [];
+        foreach ($bookings as $b) {
+            $taken[] = [
+                'start' => Carbon::parse($b->start_time)->format('H:i'),
+                'end'   => Carbon::parse($b->end_time)->format('H:i'),
+            ];
+        }
+
+        // generate slot suggestions (your logic can be more fancy)
+        // for now: 08:00 → 17:00 in 1-hour blocks, excluding taken times
+
+        $possible = [];
+        $start = Carbon::createFromTime(8, 0);
+        $end   = Carbon::createFromTime(17, 0);
+
+        while ($start->lt($end)) {
+            $slotStart = $start->copy();
+            $slotEnd = $start->copy()->addHour();
+
+            $isTaken = false;
+
+            foreach ($taken as $t) {
+                $tStart = Carbon::parse($t['start']);
+                $tEnd   = Carbon::parse($t['end']);
+
+                // detect overlap
+                if ($slotStart->lt($tEnd) && $slotEnd->gt($tStart)) {
+                    $isTaken = true;
+                    break;
+                }
+            }
+
+            if (!$isTaken) {
+                $possible[] = [
+                    'start' => $slotStart->format('H:i'),
+                    'end'   => $slotEnd->format('H:i')
+                ];
+            }
+
+            $start->addHour();
+        }
+
+        return response()->json([
+            'booked' => $taken,
+            'recommended' => $possible
+        ]);
+    }
 
     public function cancel($id)
     {
@@ -233,10 +297,9 @@ class BookingController extends Controller
         $this->notificationService->createNotification(
             $booking->user_id,
             'Booking Cancelled',
-            "Your booking for {$booking->space_type} on {$booking->date} has been cancelled.",
+            "Your booking for {$booking->space_type} on " . Carbon::parse($booking->date)->format('Y-m-d') . " has been cancelled.",
             'error'
         );
-
         return redirect()->route('bookings.index')->with('success', 'Booking cancelled successfully.');
     }
 

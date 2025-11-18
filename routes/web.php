@@ -33,20 +33,17 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/verify-otp', [OtpController::class, 'showVerifyForm'])->name('otp.verify.form');
-Route::post('/verify-otp', [OtpController::class, 'verifyOtp'])->name('otp.verify');
-Route::post('/resend-otp', [OtpController::class, 'resendOtp'])->name('otp.resend');
 
 // Profile
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [AuthController::class, 'profile'])->name('profile.show');
-    Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
-    Route::post('profile/2fa-toggle', [AuthController::class, 'toggle2FA'])->name('profile.2fa.toggle');
-    Route::get('/profile/devices', [App\Http\Controllers\DeviceController::class, 'index'])->name('profile.devices');
-    Route::post('/profile/devices/logout/{id}', [App\Http\Controllers\DeviceController::class, 'logout'])->name('profile.devices.logout');
+    Route::get('/verify-otp', [OtpController::class, 'showVerifyForm'])->name('otp.verify.form');
+    Route::post('/verify-otp', [OtpController::class, 'verifyOtp'])->name('otp.verify');
+    Route::post('/resend-otp', [OtpController::class, 'resendOtp'])->name('otp.resend');
+
+
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth','two_factor','prevent-back-history'])->group(function () {
 
     Route::prefix('admin/reports')->name('admin.reports.')->group(function () {
 
@@ -95,6 +92,7 @@ Route::middleware(['auth'])->group(function () {
     // Desk Management Routes (Admin Only)
     Route::resource('desks', \App\Http\Controllers\DeskController::class)
         ->middleware(['auth']);
+    Route::get('/bookings/availability', [App\Http\Controllers\BookingController::class, 'availability']);
 
     // Ajax routes for dynamic dropdowns
     Route::get('/bookings/get-buildings/{campus}', [BookingController::class, 'getBuildings'])->name('bookings.getBuildings');
@@ -104,13 +102,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index'); // List of user's bookings
     Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create'); // Booking form
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store'); // Store booking
-    Route::get('/bookings/calendar', [BookingController::class, 'calendarView'])->name('bookings.calendar');
+
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
     Route::patch('/bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     //notification routes
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 
+
+    Route::get('/profile', [AuthController::class, 'profile'])->name('profile.show');
+    Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
+    Route::post('profile/2fa-toggle', [AuthController::class, 'toggle2FA'])->name('profile.2fa.toggle');
+    Route::get('/profile/devices', [App\Http\Controllers\DeviceController::class, 'index'])->name('profile.devices');
+    Route::post('/profile/devices/logout/{id}', [App\Http\Controllers\DeviceController::class, 'logout'])->name('profile.devices.logout');
 
     Route::get('/employee/dashboard',[DashboardController::class,'index'])->name('employee.dashboard');
      Route::get('admin/dashboard',[DashboardController::class,'adminIndex'])->name('admin.dashboard');
