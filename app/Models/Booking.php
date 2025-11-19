@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Booking extends Model
 {
-    use HasFactory;
+    use HasFactory,Searchable;
 
     protected $fillable = [
         'user_id',
@@ -60,6 +61,30 @@ class Booking extends Model
             return $this->boardroom;
         }
         return null;
+    }
+    public function toSearchableArray()
+    {
+        // Determine the related space name based on space_type
+        $spaceName = null;
+
+        if ($this->space_type === 'desk' && $this->desk) {
+            $spaceName = $this->desk->desk_number; // or any relevant field
+        } elseif ($this->space_type === 'boardroom' && $this->boardroom) {
+            $spaceName = $this->boardroom->name; // or any relevant field
+        }
+
+        return [
+            'user' => $this->user ? $this->user->name : null,
+            'campus' => $this->campus ? $this->campus->name : null,
+            'building' => $this->building ? $this->building->name : null,
+            'floor' => $this->floor ? $this->floor->name : null,
+            'space_type' => $this->space_type,
+            'space_name' => $spaceName,
+            'date' => $this->date ? $this->date->toDateString() : null,
+            'start_time' => $this->start_time,
+            'end_time' => $this->end_time,
+            'status' => $this->status,
+        ];
     }
 
 

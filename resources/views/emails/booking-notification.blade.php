@@ -2,30 +2,34 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Booking Notification</title>
+    <title>Flexi Booking Notification</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            color: #000000;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
             margin: 0;
             padding: 0;
         }
         .container {
             max-width: 600px;
             margin: 40px auto;
-            padding: 20px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            padding: 25px;
+            background-color: #111111;
+            border: 1px solid #333333;
+            border-radius: 10px;
         }
         h2 {
             text-align: center;
-            color: #000000;
-            margin-bottom: 20px;
+            color: #ffffff;
+            margin-bottom: 25px;
+            font-size: 24px;
+            letter-spacing: 1px;
         }
         p {
             line-height: 1.6;
             margin-bottom: 15px;
+            color: #e0e0e0;
         }
         ul {
             list-style-type: none;
@@ -33,21 +37,33 @@
             margin-bottom: 20px;
         }
         ul li {
-            padding: 8px 0;
-            border-bottom: 1px solid #e0e0e0;
+            padding: 10px 0;
+            border-bottom: 1px solid #333333;
+            color: #ffffff;
         }
         ul li:last-child {
             border-bottom: none;
         }
+        .highlight {
+            font-weight: bold;
+            color: #ffffff;
+        }
         .disclaimer {
             margin-top: 30px;
             font-size: 12px;
-            color: #555555;
-            border-top: 1px solid #e0e0e0;
+            color: #aaaaaa;
+            border-top: 1px solid #333333;
             padding-top: 10px;
         }
-        .highlight {
-            font-weight: bold;
+        a {
+            color: #ffffff;
+            text-decoration: none;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888888;
         }
     </style>
 </head>
@@ -80,10 +96,14 @@
         <li><strong>End Time:</strong> {{ \Carbon\Carbon::parse($booking->end_time)->format('H:i') }}</li>
     </ul>
 
-    <p>Thank you for using <span class="highlight">WorkSpace Hub</span>!</p>
+    <p>Thank you for using <span class="highlight">Flexi</span> to manage your workspace efficiently!</p>
 
     <div class="disclaimer">
-        <p><strong>Disclaimer:</strong> Please ensure you keep the workspace clean and tidy after use. Dispose of trash properly, return any moved items to their original positions, and respect shared spaces. Your cooperation helps maintain a productive and comfortable environment for everyone.</p>
+        <p><strong>Disclaimer:</strong> Please ensure you maintain cleanliness and respect shared spaces. Dispose of trash properly, return any moved items to their original positions, and follow workspace rules. Your cooperation ensures a productive environment for all users.</p>
+    </div>
+
+    <div class="footer">
+        &copy; {{ date('Y') }} Flexi. All rights reserved.
     </div>
 </div>
 </body>

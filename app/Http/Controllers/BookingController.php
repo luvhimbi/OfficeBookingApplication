@@ -25,31 +25,39 @@ class BookingController extends Controller
         $this->emailService = $emailService;
         $this->notificationService = $notificationService;
     }
-    public function index()
+    public function index(Request $request)
     {
-        $query = Booking::with(['user', 'campus', 'building', 'floor', 'desk', 'boardroom'])
-            ->latest();
 
-        // If the logged-in user is NOT admin, show only their bookings
-        if (auth()->user()->role !== 'admin') {
-            $query->where('user_id', auth()->id());
+        $search = $request->input('search');
+        if ($search) {
+            $bookings= $this->search($search);
+        }
+        else {
+
+            $query = Booking::with(['user', 'campus', 'building', 'floor', 'desk', 'boardroom'])
+                ->latest();
+
+            // If the logged-in user is NOT admin, show only their bookings
+            if (auth()->user()->role !== 'admin') {
+                $query->where('user_id', auth()->id());
+            }
+
+            $bookings = $query->get();
+
+            // Optional debug logging
+            foreach ($bookings as $booking) {
+                $spaceName = $booking->space_type === 'desk'
+                    ? ($booking->desk->desk_number ?? 'N/A')
+                    : ($booking->boardroom->name ?? 'N/A');
+
+                \Log::info("Booking {$booking->id} space:", [
+                    'space_type' => $booking->space_type,
+                    'space_name' => $spaceName
+                ]);
+            }
         }
 
-        $bookings = $query->get();
-
-        // Optional debug logging
-        foreach ($bookings as $booking) {
-            $spaceName = $booking->space_type === 'desk'
-                ? ($booking->desk->desk_number ?? 'N/A')
-                : ($booking->boardroom->name ?? 'N/A');
-
-            \Log::info("Booking {$booking->id} space:", [
-                'space_type' => $booking->space_type,
-                'space_name' => $spaceName
-            ]);
-        }
-
-        return view('Employee.bookings.index', compact('bookings'));
+        return view('Employee.bookings.index', compact('bookings','search'));
     }
 
 
@@ -381,6 +389,11 @@ class BookingController extends Controller
         );
 
         return redirect()->route('bookings.index')->with('success', 'Booking updated successfully!');
+    }
+
+    public function search(string $term)
+    {
+        return Booking::search($term)->paginate(10);
     }
 
 }

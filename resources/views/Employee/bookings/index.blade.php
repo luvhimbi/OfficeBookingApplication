@@ -26,6 +26,11 @@
                         </div>
                     @endif
                 @endforeach
+                <form method="GET" action="{{ route('bookings.index') }}" class="mb-3">
+                    <label for="search" class="form-label">Search Bookings</label>
+                    <input type="text" id="search" name="search" value="{{ $search ?? '' }}" placeholder="Search by campus, building, floor, space type..." class="form-control">
+                    <small class="text-muted">You can search by  campus, building, floor, or space type (desk/boardroom).</small>
+                </form>
 
                 {{-- Table --}}
                 <div class="table-responsive">
