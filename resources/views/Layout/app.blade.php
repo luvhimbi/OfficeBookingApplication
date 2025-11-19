@@ -101,11 +101,31 @@
             min-height: calc(100vh - 120px);
         }
 
-        footer {
-            background-color:#000000 !important;
-            color: #adb5bd;
+        .footer {
+            background-color: #000000 !important;
+            color: #adb5bd !important;
             padding: 20px 0;
             font-size: 14px;
+        }
+
+        .footer a {
+            color: #adb5bd;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+
+        .footer a:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+
+        .footer-main {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .footer-links {
+            font-size: 13px;
         }
 
 
@@ -413,11 +433,19 @@
     @yield('content')
 </main>
 
-<footer>
+<footer class="footer mt-auto">
     <div class="container text-center">
-        <p>&copy; {{ date('Y') }} Flexi Space. All rights reserved.</p>
+        <div class="footer-main mb-2">
+            &copy; {{ date('Y') }} Flexi Space. All rights reserved.
+        </div>
+        <div class="footer-links">
+            <a href="{{ route('disclaimer') }}">Disclaimer</a> |
+            <a href="{{ route('privacy') }}">Privacy Policy</a> |
+            <a href="{{ route('terms') }}">Terms of Service</a>
+        </div>
     </div>
 </footer>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 

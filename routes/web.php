@@ -124,6 +124,10 @@ Route::middleware(['auth','two_factor','prevent-back-history'])->group(function 
      Route::get('admin/dashboard',[DashboardController::class,'adminIndex'])->name('admin.dashboard');
 
 });
+Route::view('/disclaimer', 'legal.disclaimer')->name('disclaimer');
+Route::view('/privacy', 'legal.privacy')->name('privacy');
+Route::view('/terms', 'legal.terms')->name('terms');
+
 
 
 
