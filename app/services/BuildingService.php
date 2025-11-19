@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Building;
+use App\Models\Campus;
 
 class BuildingService
 {
@@ -36,5 +37,9 @@ class BuildingService
     public function delete(Building $building)
     {
         return $building->delete();
+    }
+    public function search(string $term)
+    {
+        return Building::search($term)->paginate(10);
     }
 }

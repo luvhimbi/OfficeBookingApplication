@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Building extends Model
 {
-    use HasFactory;
+    use HasFactory,Searchable;
 
     protected $fillable = [
         'campus_id',
@@ -26,4 +27,12 @@ class Building extends Model
     {
         return $this->hasMany(Floor::class);
     }
+    public function toSearchableArray()
+    {
+        return [
+            'name'   => $this->name,
+            'campus' => $this->campus ? $this->campus->name : null,
+        ];
+    }
+
 }

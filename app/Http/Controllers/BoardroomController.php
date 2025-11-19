@@ -18,10 +18,17 @@ class BoardroomController extends Controller
         $this->boardroomService = $boardroomService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $boardrooms = $this->boardroomService->getAllBoardrooms();
-        return view('admin.boardrooms.index', compact('boardrooms'));
+        $search = $request->get('search');
+        if ($search) {
+            $boardrooms = $this->boardroomService->search($search);
+        }
+        else{
+            $boardrooms = $this->boardroomService->getAllBoardrooms();
+        }
+
+        return view('admin.boardrooms.index', compact('boardrooms', 'search'));
     }
 
     public function create()

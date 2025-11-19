@@ -20,8 +20,19 @@ class DashboardController extends Controller
             ->orderBy('start_time', 'desc')
             ->get();
 
+        // Today’s date
+        $today = Carbon::today();
+
+        // Today's bookings
+        $todaysBookings = $bookings->filter(function ($booking) use ($today) {
+            return Carbon::parse($booking->date)->isSameDay($today);
+        });
+
         // Separate upcoming and past bookings
         $upcomingBookings = $bookings->filter(function ($booking) {
+            if ($booking->status === 'cancelled') {
+                return false;
+            }
 
             $start = Carbon::parse($booking->date)
                 ->setTimeFromTimeString($booking->start_time);
@@ -29,25 +40,54 @@ class DashboardController extends Controller
             return $start->isFuture();
         });
 
+// PAST BOOKINGS (status not cancelled + end time in past)
         $pastBookings = $bookings->filter(function ($booking) {
+            if ($booking->status === 'cancelled') {
+                return false;
+            }
+
             $end = Carbon::parse($booking->date)
                 ->setTimeFromTimeString($booking->end_time);
 
             return $end->isPast();
         });
 
+        // Cancelled bookings only
+        $cancelledBookings = $bookings->filter(function ($booking) {
+            return $booking->status === 'cancelled';
+        });
 
-        // Suggested favorite spaces with count
-        $favoriteSpaces = Booking::select('campus_id', 'building_id', 'floor_id', 'space_type','space_id', DB::raw('COUNT(*) as booked_count'))
+        $favoriteSpaces = Booking::query()
+            ->select([
+                'campus_id',
+                'building_id',
+                'floor_id',
+                'space_type',
+                'space_id',
+                DB::raw('COUNT(*) as booked_count')
+            ])
             ->where('user_id', $user->id)
-            ->groupBy('campus_id', 'building_id', 'floor_id', 'space_type','space_id')
+            ->where('status', '!=', 'cancelled')
+            ->groupBy('campus_id', 'building_id', 'floor_id', 'space_type', 'space_id')
+            ->havingRaw('COUNT(*) >= 2')
             ->orderByDesc('booked_count')
             ->limit(5)
             ->with(['campus', 'building', 'floor'])
             ->get();
 
-        return view('employee.dashboard', compact('user', 'upcomingBookings', 'pastBookings', 'favoriteSpaces'));
+
+        return view('employee.dashboard',
+            compact(
+                'user',
+                'todaysBookings',
+                'upcomingBookings',
+                'pastBookings',
+                'cancelledBookings',
+                'favoriteSpaces'
+            )
+        );
     }
+
 
     public function adminIndex()
     {

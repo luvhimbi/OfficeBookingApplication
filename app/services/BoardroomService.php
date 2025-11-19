@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Boardroom;
+use App\Models\Building;
 
 class BoardroomService
 {
@@ -37,5 +38,9 @@ class BoardroomService
     public function deleteBoardroom(Boardroom $boardroom): void
     {
         $boardroom->delete();
+    }
+    public function search(string $term)
+    {
+        return Boardroom::search($term)->paginate(10);
     }
 }

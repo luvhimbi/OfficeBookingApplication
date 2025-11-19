@@ -20,42 +20,81 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
 
     <style>
+        /* Remove Bootstrap’s blue focus outlines */
+        :root {
+            --bs-primary: #000000;
+            --bs-primary-rgb: 0,0,0;
+            --bs-link-color: #000000;
+            --bs-link-hover-color: #333333;
+        }
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #f8f9fa;
         }
 
+        /* NAVBAR */
         .navbar {
-            background-color: #212529 !important;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color:var(--bs-primary) !important;      /* deep black */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             padding: 0.75rem 1rem;
         }
 
+        /* NAV LINKS */
         .nav-link {
-            color: #adb5bd !important;
+            color: #e5e5e5 !important;                  /* soft grey */
             font-weight: 500;
+            padding: 0.5rem 0.75rem !important;
+            border-radius: 4px;
             transition: 0.2s ease-in-out;
         }
 
+        /* HOVER, ACTIVE, CURRENT PAGE */
         .nav-link:hover,
-        .nav-link.active {
-            color: #fff !important;
-            background-color: rgba(0, 71, 171, 0.8);
-            border-radius: 4px;
+        .nav-link.active,
+        .nav-item.show .nav-link {
+            color: #ffffff !important;                  /* pure white */
+            background-color: #222222 !important;       /* subtle dark grey */
         }
 
+        /* NAVBAR BRAND */
+        .navbar-brand {
+            color: #ffffff !important;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* BRAND HOVER */
+        .navbar-brand:hover {
+            color: #d9d9d9 !important;
+        }
+
+        /* DROPDOWN MENU */
         .dropdown-menu {
-            background-color: #343a40;
+            background-color: #000000 !important;       /* black dropdown */
+            border: 1px solid #222222 !important;
         }
 
         .dropdown-item {
-            color: #adb5bd;
+            color: #e5e5e5 !important;
+            padding: 0.5rem 1rem;
         }
 
-        .dropdown-item:hover {
-            background-color: rgba(0, 71, 171, 0.8);
-            color: #fff;
+        .dropdown-item:hover,
+        .dropdown-item:focus,
+        .dropdown-item.active {
+            background-color: #222222 !important;
+            color: #ffffff !important;
         }
+
+        /* NAVBAR TOGGLER (Hamburger icon) */
+        .navbar-toggler {
+            border-color: #ffffff !important;
+        }
+
+        .navbar-toggler-icon {
+            filter: invert(1) !important;                          /* makes icon white */
+        }
+
 
         main {
             padding: 2rem;
@@ -63,10 +102,159 @@
         }
 
         footer {
-            background-color: #212529;
+            background-color:#000000 !important;
             color: #adb5bd;
             padding: 20px 0;
             font-size: 14px;
+        }
+
+
+        /* FORM FIELDS */
+        .form-control,
+        .form-select {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            border: 1px solid #000000 !important;
+            border-radius: 6px !important;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            border-color: #000000 !important;
+            box-shadow: none !important;
+        }
+        /* Disabled / Readonly fields */
+        .form-control:disabled,
+        .form-control[readonly],
+        select.form-control:disabled,
+        select.form-control[readonly],
+        textarea.form-control:disabled,
+        textarea.form-control[readonly] {
+            background-color: #e9ecef;
+            color: #495057;
+            opacity: 1;
+            cursor: not-allowed;
+            border: 1px solid #ced4da;
+        }
+
+        /* Optional: placeholder text for disabled fields */
+        .form-control:disabled::placeholder,
+        .form-control[readonly]::placeholder,
+        select.form-control:disabled::placeholder,
+        select.form-control[readonly]::placeholder,
+        textarea.form-control:disabled::placeholder,
+        textarea.form-control[readonly]::placeholder {
+            color: #6c757d;
+            opacity: 1;
+        }
+        /* LABELS */
+        .form-label {
+            color: #000000 !important;
+            font-weight: 500;
+        }
+
+        /* INPUT PLACEHOLDERS */
+        ::placeholder {
+            color: #555555 !important;
+        }
+
+        /* TABLES */
+        .table {
+            --bs-table-bg: #ffffff;
+            --bs-table-striped-bg: #f5f5f5;
+            --bs-table-hover-bg: #eaeaea;
+            --bs-table-color: #000000;
+            --bs-table-border-color: #000000;
+            border: 1px solid #000000;
+        }
+
+        .table th,
+        .table td {
+            color: #000000 !important;
+            border-color: #000000 !important;
+        }
+
+        /* TABLE HEADER */
+        .table thead th {
+            background-color: #000000 !important;
+            color: #ffffff !important;
+            border-color: #000000 !important;
+        }
+
+        /* BUTTONS */
+        .btn {
+            border-radius: 6px !important;
+            border-width: 1px !important;
+            text-transform: capitalize;
+        }
+
+        /* Primary = black */
+        .btn-primary {
+            background-color: #000000 !important;
+            border-color: #000000 !important;
+            color: #ffffff !important;
+        }
+
+        .btn-primary:hover {
+            background-color: #333333 !important;
+            border-color: #333333 !important;
+        }
+
+        /* Secondary = white with black border */
+        .btn-secondary {
+            background-color: #ffffff !important;
+            border-color: #000000 !important;
+            color: #000000 !important;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f0f0f0 !important;
+        }
+
+        /* Danger (if needed): red but not neon */
+        .btn-danger {
+            background-color: #b00000 !important;
+            border-color: #b00000 !important;
+        }
+
+        /* Pagination */
+        .page-link {
+            color: #000000 !important;
+        }
+
+        .page-link:hover {
+            background-color: #eeeeee !important;
+            color: #000000 !important;
+        }
+
+        .page-item.active .page-link {
+            background-color: #000000 !important;
+            border-color: #000000 !important;
+            color: #ffffff !important;
+        }
+        /* Badges */
+        .badge {
+            background-color: #212529;
+            color: #fff;
+        }
+
+        /* Alerts */
+        .alert {
+            border-radius: 1rem;
+            color: #212529;
+        }
+
+        /* Cards */
+        .card {
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .brand-subtext {
+            display: block; /* ensures it goes below the main text */
+            font-size: 0.8rem; /* smaller text */
+            color: #6c757d; /* optional: gray color */
         }
 
 
@@ -78,10 +266,10 @@
 <nav class="navbar navbar-expand-lg sticky-top navbar-dark">
     <div class="container-fluid">
 
-        <a class="navbar-brand" href="#">
-            WorkSpace Hub
+        <a class="navbar-brand d-flex flex-column align-items-start" href="#">
+            <span class="brand-main">Flexi Space</span>
+            <small class="brand-subtext">Internal Booking System</small>
         </a>
-
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -227,7 +415,7 @@
 
 <footer>
     <div class="container text-center">
-        <p>&copy; {{ date('Y') }} WorkSpace Hub. All rights reserved.</p>
+        <p>&copy; {{ date('Y') }} Flexi Space. All rights reserved.</p>
     </div>
 </footer>
 

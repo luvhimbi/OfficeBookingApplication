@@ -37,4 +37,9 @@ class CampusService
     {
         return $campus->delete();
     }
+    public function search(string $term)
+    {
+        return Campus::search($term)->paginate(10);
+    }
+
 }

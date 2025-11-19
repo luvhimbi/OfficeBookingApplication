@@ -18,12 +18,16 @@ class FloorController extends Controller
 
     public function index(Request $request)
     {
+        $search = $request->get('search');
+        if ($search) {
+            $floors=$this->floorService->search($search);
+        }
         $buildingId = $request->building_id ?? null;
         $floors = $this->floorService->getAll($buildingId);
 
         $building = $buildingId ? Building::findOrFail($buildingId) : null;
 
-        return view('admin.floors.index', compact('floors', 'building'));
+        return view('admin.floors.index', compact('floors', 'building','search'));
     }
 
     public function create(Request $request)

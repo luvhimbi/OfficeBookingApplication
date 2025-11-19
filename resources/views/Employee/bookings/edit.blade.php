@@ -1,16 +1,15 @@
 @extends('Layout.app')
 
-@section('title', 'Book a Space')
+@section('title', 'Edit Booking')
 
 @section('content')
     <div class="container">
         <div class="card border-0 p-4">
             <div class="d-flex align-items-center mb-4 justify-content-between">
                 <div class="d-flex align-items-center">
-                    <i class="bi bi-door-open text-primary fs-3 me-2"></i>
-                    <h3 class="mb-0 fw-bold">Book a Space</h3>
+                    <i class="bi bi-pencil-square text-primary fs-3 me-2"></i>
+                    <h3 class="mb-0 fw-bold">Edit Booking</h3>
                 </div>
-
             </div>
 
             {{-- Error Messages --}}
@@ -31,8 +30,9 @@
                 </div>
             @endif
 
-            <form action="{{ route('bookings.store') }}" method="POST" id="bookingForm" class="needs-validation" novalidate>
+            <form action="{{ route('bookings.update', $booking->id) }}" method="POST" id="editBookingForm" class="needs-validation" novalidate>
                 @csrf
+                @method('PUT')
 
                 {{-- Step 1: Campus --}}
                 <div class="mb-4">
@@ -42,7 +42,7 @@
                     <select class="form-select" id="campus_id" name="campus_id" required>
                         <option value="">Select Campus</option>
                         @foreach($campuses as $campus)
-                            <option value="{{ $campus->id }}" {{ old('campus_id') == $campus->id ? 'selected' : '' }}>
+                            <option value="{{ $campus->id }}" {{ $booking->campus_id == $campus->id ? 'selected' : '' }}>
                                 {{ $campus->name }}
                             </option>
                         @endforeach
@@ -56,8 +56,13 @@
                         <i class="bi bi-building me-2"></i> Step 2: Select Building
                         <span class="spinner-border spinner-border-sm ms-2 d-none" id="buildingLoader"></span>
                     </h5>
-                    <select class="form-select" id="building_id" name="building_id" required disabled>
+                    <select class="form-select" id="building_id" name="building_id" required>
                         <option value="">Select Building</option>
+                        @foreach($buildings as $building)
+                            <option value="{{ $building->id }}" {{ $booking->building_id == $building->id ? 'selected' : '' }}>
+                                {{ $building->name }}
+                            </option>
+                        @endforeach
                     </select>
                     <div class="invalid-feedback">Please select a building.</div>
                 </div>
@@ -68,8 +73,13 @@
                         <i class="bi bi-layers me-2"></i> Step 3: Select Floor
                         <span class="spinner-border spinner-border-sm ms-2 d-none" id="floorLoader"></span>
                     </h5>
-                    <select class="form-select" id="floor_id" name="floor_id" required disabled>
+                    <select class="form-select" id="floor_id" name="floor_id" required>
                         <option value="">Select Floor</option>
+                        @foreach($floors as $floor)
+                            <option value="{{ $floor->id }}" {{ $booking->floor_id == $floor->id ? 'selected' : '' }}>
+                                {{ $floor->name }}
+                            </option>
+                        @endforeach
                     </select>
                     <div class="invalid-feedback">Please select a floor.</div>
                 </div>
@@ -79,10 +89,10 @@
                     <h5 class="fw-semibold text-primary mb-2">
                         <i class="bi bi-diagram-3 me-2"></i> Step 4: Select Space Type
                     </h5>
-                    <select class="form-select" id="space_type" name="space_type" required disabled>
+                    <select class="form-select" id="space_type" name="space_type" required>
                         <option value="">Select Type</option>
-                        <option value="desk" {{ old('space_type') == 'desk' ? 'selected' : '' }}>Desk</option>
-                        <option value="boardroom" {{ old('space_type') == 'boardroom' ? 'selected' : '' }}>Boardroom</option>
+                        <option value="desk" {{ $booking->space_type == 'desk' ? 'selected' : '' }}>Desk</option>
+                        <option value="boardroom" {{ $booking->space_type == 'boardroom' ? 'selected' : '' }}>Boardroom</option>
                     </select>
                     <div class="invalid-feedback">Please select a space type.</div>
                 </div>
@@ -93,9 +103,15 @@
                         <i class="bi bi-door-closed me-2"></i> Step 5: Select Space
                         <span class="spinner-border spinner-border-sm ms-2 d-none" id="spaceLoader"></span>
                     </h5>
-                    <select class="form-select" id="space_id" name="space_id" required disabled>
+                    <select class="form-select" id="space_id" name="space_id" required>
                         <option value="">Select Space</option>
+                        @foreach($spaces as $space)
+                            <option value="{{ $space->id }}" {{ $booking->space_id == $space->id ? 'selected' : '' }}>
+                                {{ $booking->space_type === 'desk' ? $space->desk_number : $space->name }}
+                            </option>
+                        @endforeach
                     </select>
+
                     <div class="invalid-feedback">Please select a space.</div>
                 </div>
 
@@ -111,51 +127,41 @@
                                    class="form-control"
                                    id="date"
                                    name="date"
-                                   value="{{ old('date') }}"
+                                   value="{{ \Carbon\Carbon::parse($booking->date)->format('Y-m-d') }}"
                                    required>
+
                             <div class="invalid-feedback">Please select a date.</div>
                         </div>
                         <div class="col-md-4">
                             <label for="start_time" class="form-label">Start Time</label>
-                            <input type="time"
-                                   class="form-control"
-                                   id="start_time"
-                                   name="start_time"
-                                   value="{{ old('start_time') }}"
-                                   required>
+                            <input type="time" class="form-control" id="start_time" name="start_time" value="{{ $booking->start_time }}" required>
                             <div class="invalid-feedback">Please select a start time.</div>
                         </div>
                         <div class="col-md-4">
                             <label for="end_time" class="form-label">End Time</label>
-                            <input type="time"
-                                   class="form-control"
-                                   id="end_time"
-                                   name="end_time"
-                                   value="{{ old('end_time') }}"
-                                   required>
+                            <input type="time" class="form-control" id="end_time" name="end_time" value="{{ $booking->end_time }}" required>
                             <div class="invalid-feedback">Please select an end time.</div>
                         </div>
                     </div>
                 </div>
                 <div class="mt-3" id="slotSuggestionWrapper" style="display:none;">
-                    <h6 class="fw-bold">Suggested Time Slots</h6>
+                    <h6 class="fw-bold">Available Time Slots</h6>
                     <div id="slotSuggestions" class="d-flex flex-wrap gap-2"></div>
                 </div>
 
                 {{-- Submit Button --}}
                 <div class="d-grid mt-4">
                     <button type="submit" class="btn btn-primary btn-lg fw-semibold rounded-3">
-                        <i class="bi bi-calendar-check me-2"></i> Confirm Booking
+                        <i class="bi bi-save me-2"></i> Update Booking
                     </button>
                 </div>
             </form>
         </div>
     </div>
-
 @endsection
+
 @push('scripts')
     <script src="{{ asset('js/booking-form.js') }}"></script>
     <script src="{{ asset('js/autoPopulateBooking.js') }}"></script>
     <script src="{{ asset('js/DisplayingPopUps.js') }}"></script>
-
 @endpush

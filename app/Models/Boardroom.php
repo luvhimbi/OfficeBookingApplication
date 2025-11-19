@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Laravel\Scout\Searchable;
 
 class Boardroom extends Model
 {
-    use HasFactory;
+    use HasFactory , Searchable;
 
     protected $fillable = [
         'name',
@@ -37,6 +38,16 @@ class Boardroom extends Model
     {
         return $this->belongsTo(Floor::class);
     }
-
+    public function toSearchableArray()
+    {
+        return [
+            'name'   => $this->name,
+            'capacity'=>$this->capacity,
+            'description'=>$this->description,
+            'campus' => $this->campus ? $this->campus->name : null,
+            'building'=>$this->building ? $this->building->name : null,
+            'floor'=>$this->floor ? $this->floor->name : null,
+        ];
+    }
 
 }

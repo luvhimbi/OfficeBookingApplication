@@ -18,10 +18,17 @@ class DeskController extends Controller
         $this->deskService = $deskService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $desks = $this->deskService->all();
-        return view('admin.desks.index', compact('desks'));
+        $search = $request->get('search');
+        if ($search) {
+            $desks = $this->deskService->search($search);
+        }
+        else{
+            $desks = $this->deskService->all();
+        }
+
+        return view('admin.desks.index', compact('desks', 'search'));
     }
 
     public function create()

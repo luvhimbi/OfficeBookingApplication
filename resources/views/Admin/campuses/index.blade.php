@@ -22,74 +22,83 @@
             </div>
         @endif
 
+        {{-- Search Form --}}
+        <form method="GET" action="{{ route('campuses.index') }}" class="mb-3">
+            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Search campuses..." class="form-control">
+        </form>
+
         <div class="card shadow-sm">
             <div class="card-body">
                 @if($campuses->count() > 0)
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Address</th>
-                                    <th>City</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
+                            <tr>
+                                <th>Name</th>
+                                <th>Address</th>
+                                <th>City</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                @foreach($campuses as $campus)
-                                    <tr>
-                                        <td>{{ $campus->name }}</td>
-                                        <td>{{ $campus->address ?? 'N/A' }}</td>
-                                        <td>{{ $campus->city ?? 'N/A' }}</td>
-                                        <td>
-                                            @if($campus->is_active)
-                                                <span class="badge bg-success">Active</span>
-                                            @else
-                                                <span class="badge bg-danger">Inactive</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <a href="{{ route('campuses.show', $campus) }}" class="btn btn-sm btn-info">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                                <a href="{{ route('campuses.edit', $campus) }}" class="btn btn-sm btn-warning">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCampusModal{{ $campus->id }}">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                            @foreach($campuses as $campus)
+                                <tr>
+                                    <td>{{ $campus->name }}</td>
+                                    <td>{{ $campus->address ?? 'N/A' }}</td>
+                                    <td>{{ $campus->city ?? 'N/A' }}</td>
+                                    <td>
+                                        @if($campus->is_active)
+                                            <span class="badge bg-success">Active</span>
+                                        @else
+                                            <span class="badge bg-danger">Inactive</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ route('campuses.show', $campus) }}" class="btn btn-sm btn-info">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ route('campuses.edit', $campus) }}" class="btn btn-sm btn-warning">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCampusModal{{ $campus->id }}">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
 
-                                    <!-- Delete Modal -->
-                                    <div class="modal fade" id="deleteCampusModal{{ $campus->id }}" tabindex="-1" aria-labelledby="deleteCampusModalLabel{{ $campus->id }}" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="deleteCampusModalLabel{{ $campus->id }}">Confirm Delete</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    Are you sure you want to delete the campus <strong>{{ $campus->name }}</strong>?
-                                                    This action cannot be undone.
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                    <form action="{{ route('campuses.destroy', $campus) }}" method="POST">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                                    </form>
-                                                </div>
+                                <!-- Delete Modal -->
+                                <div class="modal fade" id="deleteCampusModal{{ $campus->id }}" tabindex="-1" aria-labelledby="deleteCampusModalLabel{{ $campus->id }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deleteCampusModalLabel{{ $campus->id }}">Confirm Delete</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Are you sure you want to delete the campus <strong>{{ $campus->name }}</strong>?
+                                                This action cannot be undone.
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <form action="{{ route('campuses.destroy', $campus) }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
-                                @endforeach
+                                </div>
+                            @endforeach
                             </tbody>
                         </table>
+                        {{-- Pagination links --}}
+{{--                        <div class="d-flex justify-content-end mt-3">--}}
+{{--                            {{ $campuses->withQueryString()->links() }}--}}
+{{--                        </div>--}}
                     </div>
                 @else
                     <div class="text-center py-4">

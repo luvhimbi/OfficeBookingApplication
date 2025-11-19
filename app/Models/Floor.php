@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Floor extends Model
 {
 
-    use HasFactory;
+    use HasFactory,Searchable;
 
     protected $fillable = [
         'building_id',
@@ -31,5 +32,12 @@ class Floor extends Model
     public function boardrooms()
     {
         return $this->hasMany(Boardroom::class);
+    }
+    public function toSearchableArray()
+    {
+        return [
+            'building' => $this->building ? $this->building->name : null,
+            'name'   => $this->name,
+        ];
     }
 }

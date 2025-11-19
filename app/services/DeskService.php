@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Campus;
 use App\Models\Desk;
 
 class DeskService
@@ -36,5 +37,9 @@ class DeskService
     public function delete(Desk $desk)
     {
         return $desk->delete();
+    }
+    public function search(string $term)
+    {
+        return Desk::search($term)->paginate(10);
     }
 }

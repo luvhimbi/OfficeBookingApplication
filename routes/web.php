@@ -69,7 +69,6 @@ Route::middleware(['auth','two_factor','prevent-back-history'])->group(function 
          Route::delete('/admin/invites/{invite}', [InviteController::class, 'destroy'])
              ->name('admin.invites.destroy');
 
-
          Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
     // Campus Management Routes (Admin Only)
     Route::resource('campuses', \App\Http\Controllers\CampusController::class)
@@ -77,6 +76,7 @@ Route::middleware(['auth','two_factor','prevent-back-history'])->group(function 
 
     Route::get('/bookings', [App\Http\Controllers\BookingController::class, 'index'])
         ->name('bookings.index');
+
     // Building Management Routes (Admin Only)
     Route::resource('buildings', \App\Http\Controllers\BuildingController::class)
         ->middleware(['auth']);
@@ -92,6 +92,7 @@ Route::middleware(['auth','two_factor','prevent-back-history'])->group(function 
     // Desk Management Routes (Admin Only)
     Route::resource('desks', \App\Http\Controllers\DeskController::class)
         ->middleware(['auth']);
+
     Route::get('/bookings/availability', [App\Http\Controllers\BookingController::class, 'availability']);
 
     // Ajax routes for dynamic dropdowns
@@ -102,6 +103,9 @@ Route::middleware(['auth','two_factor','prevent-back-history'])->group(function 
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index'); // List of user's bookings
     Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create'); // Booking form
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store'); // Store booking
+
+    Route::get('bookings/{booking}/edit', [BookingController::class, 'edit'])->name('bookings.edit');
+    Route::put('bookings/{booking}', [BookingController::class, 'update'])->name('bookings.update');
 
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
     Route::patch('/bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');

@@ -22,6 +22,10 @@
                 </div>
             @endif
 
+            <form method="GET" action="{{ route('boardrooms.index') }}" class="mb-3">
+                <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Search buildings..." class="form-control">
+            </form>
+
             {{-- Boardrooms Table --}}
             <div class="table-responsive">
                 <table class="table table-hover align-middle">

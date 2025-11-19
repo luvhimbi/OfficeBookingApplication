@@ -15,10 +15,18 @@ class CampusController extends Controller
         $this->campusService = $campusService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $campuses = $this->campusService->getAll();
-        return view('admin.campuses.index', compact('campuses'));
+        $search = $request->input('search');
+
+        if ($search) {
+            // Use Laravel Scout search
+            $campuses = $this->campusService->search($search);
+        } else {
+            $campuses = $this->campusService->getAll();
+        }
+
+        return view('admin.campuses.index', compact('campuses', 'search'));
     }
 
     public function create()

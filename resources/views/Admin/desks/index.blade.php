@@ -14,6 +14,7 @@
                 </a>
             </div>
 
+
             {{-- Success Message --}}
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -21,6 +22,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
+
+            <form method="GET" action="{{ route('desks.index') }}" class="mb-3">
+                <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Search campuses..." class="form-control">
+            </form>
 
             {{-- Desks Table --}}
             <div class="table-responsive">

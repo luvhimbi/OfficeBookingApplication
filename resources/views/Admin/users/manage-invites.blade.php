@@ -5,29 +5,29 @@
 @section('content')
     <div class="container mt-4">
         <div class="card border-0 shadow-lg rounded-4">
-            <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
-                <h4 class="mb-0 fw-bold"><i class="bi bi-envelope-paper"></i> Manage Invites</h4>
+            <div class="card-header bg-white text-black py-3 d-flex justify-content-between align-items-center border-bottom">
+                <h4 class="mb-0 fw-bold text-black"><i class="bi bi-envelope-paper text-black"></i> Manage Invites</h4>
 
-                <a href="{{ route('admin.invites.create') }}" class="btn btn-light">
+                <a href="{{ route('admin.invites.create') }}" class="btn btn-outline-dark rounded-pill">
                     <i class="bi bi-plus-circle"></i> New Invite
                 </a>
             </div>
 
-            <div class="card-body bg-light">
+            <div class="card-body bg-white">
 
                 @if (session('success'))
                     <div class="alert alert-success rounded-pill">{{ session('success') }}</div>
                 @endif
 
                 @if ($invites->isEmpty())
-                    <div class="alert alert-warning text-center rounded-pill shadow-sm">
+                    <div class="alert alert-secondary text-center rounded-pill shadow-sm">
                         <i class="bi bi-exclamation-triangle"></i> No invites found.
                     </div>
                 @else
 
                     <div class="table-responsive">
                         <table class="table table-hover align-middle bg-white rounded-3 shadow-sm">
-                            <thead class="table-primary text-dark">
+                            <thead class="bg-white border-bottom text-black fw-bold">
                             <tr>
                                 <th>#</th>
                                 <th>Email</th>
@@ -42,15 +42,15 @@
                             <tbody>
                             @foreach ($invites as $index => $invite)
                                 <tr class="table-row-hover">
-                                    <td>{{ ($invites->currentPage() - 1) * $invites->perPage() + $index + 1 }}</td>
+                                    <td class="text-black">{{ ($invites->currentPage() - 1) * $invites->perPage() + $index + 1 }}</td>
 
-                                    <td>{{ $invite->email }}</td>
+                                    <td class="text-black">{{ $invite->email }}</td>
 
-                                    <td>{{ $invite->firstname }} {{ $invite->lastname }}</td>
+                                    <td class="text-black">{{ $invite->firstname }} {{ $invite->lastname }}</td>
 
                                     <td>
                                         @if($invite->role === 'admin')
-                                            <span class="badge bg-danger px-3 py-2 rounded-pill">Admin</span>
+                                            <span class="badge bg-dark px-3 py-2 rounded-pill">Admin</span>
                                         @else
                                             <span class="badge bg-secondary px-3 py-2 rounded-pill">{{ ucfirst($invite->role) }}</span>
                                         @endif
@@ -64,17 +64,13 @@
                                         @endif
                                     </td>
 
-                                    <td>{{ $invite->created_at->format('d M Y, H:i') }}</td>
+                                    <td class="text-black">{{ $invite->created_at->format('d M Y, H:i') }}</td>
 
                                     <td class="d-flex gap-2">
 
-                                        {{-- SHOW RESEND BUTTON ONLY IF:
-                                             1. Not used
-                                             2. Not expired
-                                        --}}
                                         @if(!$invite->used && (!$invite->expires_at || now()->lt($invite->expires_at)))
                                             <a href="{{ route('admin.invites.create') }}?email={{ $invite->email }}"
-                                               class="btn btn-sm btn-outline-primary rounded-pill">
+                                               class="btn btn-sm btn-outline-dark rounded-pill">
                                                 <i class="bi bi-arrow-repeat"></i> Resend
                                             </a>
                                         @endif
@@ -112,7 +108,7 @@
 
     <style>
         .table-row-hover:hover {
-            background-color: #f8f9fa !important;
+            background-color: #f2f2f2 !important;
             transition: 0.3s;
         }
     </style>

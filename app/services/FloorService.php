@@ -43,4 +43,9 @@ class FloorService
     {
         return $floor->delete();
     }
+
+    public function search(mixed $search)
+    {
+        return Floor::search($search);
+    }
 }

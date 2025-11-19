@@ -194,10 +194,10 @@
     result.forEach(space => {
     const option = document.createElement('option');
     option.value = space.id;
-
     if (spaceType === 'desk') {
     option.textContent = `Desk #${space.desk_number}`;
-} else if (spaceType === 'boardroom') {
+       }
+    else if (spaceType === 'boardroom') {
     option.textContent = space.name;
     if (space.capacity) {
     option.textContent += ` (Capacity: ${space.capacity})`;

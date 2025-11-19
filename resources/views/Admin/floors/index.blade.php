@@ -36,7 +36,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
-
+            <form method="GET" action="{{ route('floors.index') }}" class="mb-3">
+                <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Search Floors..." class="form-control">
+            </form>
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>

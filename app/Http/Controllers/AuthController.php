@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\AuthService;
+use App\Services\NotificationService;
 use App\Services\OtpService;
 use Illuminate\Http\Request;
 
@@ -11,10 +12,13 @@ class AuthController extends Controller
     protected $authService;
     protected $otpService;
 
-    public function __construct(AuthService $authService, OtpService $otpService)
+    protected $notificationService;
+
+    public function __construct(AuthService $authService, OtpService $otpService, NotificationService $notificationService)
     {
         $this->authService = $authService;
         $this->otpService = $otpService;
+        $this->notificationService = $notificationService;
     }
 
     public function showLoginForm()
@@ -80,6 +84,11 @@ class AuthController extends Controller
     {
         $user = auth()->user();
         $enabled = $this->authService->toggleTwoFactor($user);
+
+        $this->notificationService->createNotification(
+            $user->id,"Two factoer authentication status changed.",
+            $enabled ? 'Two-Factor Authentication enabled.' : 'Two-Factor Authentication disabled.'
+        );
 
         return back()->with('success', $enabled
             ? 'Two-Factor Authentication has been enabled.'

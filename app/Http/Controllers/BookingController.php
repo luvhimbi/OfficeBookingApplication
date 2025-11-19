@@ -121,10 +121,14 @@ class BookingController extends Controller
             $spaces = [];
 
             if ($type === 'desk') {
+                Log::info("Fetching desks for floor $floorId");
+
                 $spaces = Desk::where('floor_id', $floorId)
                     ->where('is_active', true)
                     ->orderBy('desk_number')
-                    ->get(['id', 'desk_number', 'name', 'is_active']);
+                    ->get(['id', 'desk_number']);
+
+                Log::info("Desks fetched:", $spaces->toArray());
             } elseif ($type === 'boardroom') {
                 $spaces = Boardroom::where('floor_id', $floorId)
                     ->where('is_active', true)
@@ -169,10 +173,11 @@ class BookingController extends Controller
         $spaceModel = $validated['space_type'] === 'desk' ? Desk::class : Boardroom::class;
         $space = $spaceModel::findOrFail($validated['space_id']);
 
-        // Prevent overlapping bookings
+        // Prevent overlapping bookings EXCLUDING cancelled ones
         $conflict = Booking::where('space_type', $validated['space_type'])
             ->where('space_id', $validated['space_id'])
             ->whereDate('date', $validated['date'])
+            ->where('status', '!=', 'cancelled') // exclude cancelled bookings
             ->where(function($q) use ($startDateTime, $endDateTime) {
                 $q->where(function($query) use ($startDateTime, $endDateTime) {
                     $query->where('start_time', '<', $endDateTime->format('H:i'))
@@ -211,23 +216,27 @@ class BookingController extends Controller
 
         return redirect()->route('bookings.index')->with('success', 'Booking created successfully!');
     }
+
     public function availability(Request $request)
     {
         $request->validate([
             'space_id' => 'required|integer',
+            'space_type' => 'required|in:desk,boardroom',
             'date' => 'required|date'
         ]);
 
         $spaceId = $request->space_id;
+        $spaceType = $request->space_type;
         $date = $request->date;
 
-        // fetch all existing bookings for that space + date
-        $bookings = Booking::where('space_id', $spaceId)
+        // Fetch bookings EXCLUDING cancelled ones
+        $bookings = Booking::where('space_type', $spaceType)
+            ->where('space_id', $spaceId)
             ->where('date', $date)
+            ->where('status', '!=', 'cancelled') // ignore cancelled bookings
             ->orderBy('start_time')
             ->get(['start_time', 'end_time']);
 
-        // convert them to time ranges
         $taken = [];
         foreach ($bookings as $b) {
             $taken[] = [
@@ -236,9 +245,7 @@ class BookingController extends Controller
             ];
         }
 
-        // generate slot suggestions (your logic can be more fancy)
-        // for now: 08:00 → 17:00 in 1-hour blocks, excluding taken times
-
+        // Generate available slots
         $possible = [];
         $start = Carbon::createFromTime(8, 0);
         $end   = Carbon::createFromTime(17, 0);
@@ -253,7 +260,6 @@ class BookingController extends Controller
                 $tStart = Carbon::parse($t['start']);
                 $tEnd   = Carbon::parse($t['end']);
 
-                // detect overlap
                 if ($slotStart->lt($tEnd) && $slotEnd->gt($tStart)) {
                     $isTaken = true;
                     break;
@@ -275,6 +281,8 @@ class BookingController extends Controller
             'recommended' => $possible
         ]);
     }
+
+
 
     public function cancel($id)
     {
@@ -301,6 +309,78 @@ class BookingController extends Controller
             'error'
         );
         return redirect()->route('bookings.index')->with('success', 'Booking cancelled successfully.');
+    }
+    public function edit(Booking $booking)
+    {
+        $campuses = Campus::all();
+        $buildings = Building::all();
+        $floors = Floor::all();
+
+        // Determine the correct space type
+        $spaces = $booking->space_type === 'desk'
+            ? Desk::all()
+            : Boardroom::all();
+
+        return view('Employee.bookings.edit', compact('booking', 'campuses', 'buildings', 'floors', 'spaces'));
+    }
+
+
+    public function update(Request $request, Booking $booking)
+    {
+        $validated = $request->validate([
+            'campus_id' => 'required|exists:campuses,id',
+            'building_id' => 'required|exists:buildings,id',
+            'floor_id' => 'required|exists:floors,id',
+            'space_type' => 'required|in:desk,boardroom',
+            'space_id' => 'required',
+            'date' => 'required|date|after_or_equal:today',
+            'start_time' => 'required',
+            'end_time' => 'required|after:start_time',
+        ]);
+
+        $startDateTime = Carbon::parse($validated['date'] . ' ' . $validated['start_time']);
+        $endDateTime = Carbon::parse($validated['date'] . ' ' . $validated['end_time']);
+
+        // Conflict check excluding cancelled bookings and current booking
+        $conflict = Booking::where('space_type', $validated['space_type'])
+            ->where('space_id', $validated['space_id'])
+            ->whereDate('date', $validated['date'])
+            ->where('status', '!=', 'cancelled')
+            ->where('id', '!=', $booking->id) // exclude current booking
+            ->where(function($q) use ($startDateTime, $endDateTime) {
+                $q->where(function($query) use ($startDateTime, $endDateTime) {
+                    $query->where('start_time', '<', $endDateTime->format('H:i'))
+                        ->where('end_time', '>', $startDateTime->format('H:i'));
+                });
+            })
+            ->exists();
+
+        if ($conflict) {
+            return back()->withErrors(['space_id' => 'This space is already booked for the selected time.'])->withInput();
+        }
+
+        // Update the booking
+        $booking->update([
+            'campus_id' => $validated['campus_id'],
+            'building_id' => $validated['building_id'],
+            'floor_id' => $validated['floor_id'],
+            'space_type' => $validated['space_type'],
+            'space_id' => $validated['space_id'],
+            'date' => $validated['date'],
+            'start_time' => $validated['start_time'],
+            'end_time' => $validated['end_time'],
+        ]);
+
+        // Optional: send notification/email
+        $this->emailService->sendBookingConfirmation($booking);
+        $this->notificationService->createNotification(
+            $booking->user_id,
+            'Booking Updated',
+            "Your booking has been updated for {$booking->space_type} on {$booking->date} from {$booking->start_time} to {$booking->end_time}.",
+            'info'
+        );
+
+        return redirect()->route('bookings.index')->with('success', 'Booking updated successfully!');
     }
 
 }

@@ -16,10 +16,17 @@ class BuildingController extends Controller
         $this->buildingService = $buildingService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $buildings = $this->buildingService->getAll();
-        return view('admin.buildings.index', compact('buildings'));
+        $search = $request->input('search');
+        if ($search) {
+            $buildings=$this->buildingService->search($search);
+        }
+        else{
+            $buildings = $this->buildingService->getAll();
+        }
+
+        return view('admin.buildings.index', compact('buildings','search'));
     }
 
     public function create()
