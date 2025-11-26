@@ -2,7 +2,7 @@ OfficeSpace Booking Platform
 
 A web application for booking office resources such as desks, shared workspaces, and boardrooms. The platform simplifies workplace coordination by allowing employees to reserve spaces while giving administrators full control over resource management, schedules, and user permissions.
 
-✨Features
+Features
 Employee
 
 View av9ailable desks and boardrooms
@@ -25,4 +25,5 @@ Backend:  Laravel
 Frontend: Blade templates ,Boostrap ,Javascript
 Database:  PostgreSQL
 Auth: Laravel auth 
+
 
