@@ -4,6 +4,9 @@
 
 @section('content')
     <div class="container mt-4">
+        <a href="{{ route('admin.reports.users.export', request()->query()) }}" class="btn btn-success mb-3">
+            Export Report as PDF
+        </a>
 
         {{-- Filters --}}
         <div class="card border-0 shadow mb-4">
@@ -55,16 +58,17 @@
             </div>
             <div class="col-md-3">
                 <div class="card border-0 shadow text-center p-3">
-                    <h6>New Today</h6>
+                    <h6>Active Today</h6>
                     <h3 class="fw-bold">{{ $activeToday }}</h3>
                 </div>
             </div>
         </div>
 
+
         {{-- Charts --}}
         <div class="card border-0 shadow mb-4">
             <div class="card-body">
-                <h4>User Growth</h4>
+                <h4>User Growth in past 7 days</h4>
                 <canvas id="usersChart" height="100"></canvas>
             </div>
         </div>

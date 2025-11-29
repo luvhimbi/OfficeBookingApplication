@@ -17,8 +17,9 @@
 
     <!-- FullCalendar + SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
-
+    <script src="
+https://cdn.jsdelivr.net/npm/js-network-monitor@1.0.9/dist/js-network-monitor.min.js
+"></script>
     <style>
         /* Remove Bootstrap’s blue focus outlines */
         :root {
@@ -474,7 +475,48 @@
             if (res.isConfirmed) document.getElementById('logoutForm').submit();
         });
     }
+
 </script>
+<script>
+    // Initialize network monitor
+    const monitor = new NetworkMonitor({
+        pingUrl: '/ping.txt',
+        latencyThreshold: 1800,
+        slowConnectionTypes: ['2g', '3g', 'slow-2g'],
+        pingIntervalMs: 60000,
+        fallbackPingIntervalMs: 10000
+    });
+
+    const offlineScreen = document.createElement('div');
+    offlineScreen.id = 'offline-screen';
+    offlineScreen.style.position = 'fixed';
+    offlineScreen.style.top = '0';
+    offlineScreen.style.left = '0';
+    offlineScreen.style.width = '100%';
+    offlineScreen.style.height = '100%';
+    offlineScreen.style.background = 'rgba(0,0,0,0.8)';
+    offlineScreen.style.color = 'white';
+    offlineScreen.style.display = 'flex';
+    offlineScreen.style.flexDirection = 'column';
+    offlineScreen.style.justifyContent = 'center';
+    offlineScreen.style.alignItems = 'center';
+    offlineScreen.style.zIndex = '9999';
+    offlineScreen.innerHTML = '<h1>No Connection</h1><p>Please check your internet.</p>';
+    offlineScreen.style.display = 'none';
+    document.body.appendChild(offlineScreen);
+
+    function handleNetworkStatus(status) {
+        if (!status.online || status.poorConnection) {
+            offlineScreen.style.display = 'flex';
+        } else {
+            offlineScreen.style.display = 'none';
+        }
+    }
+
+    monitor.subscribe(handleNetworkStatus);
+    monitor.runManualCheck();
+</script>
+
 
 @stack('scripts')
 </body>

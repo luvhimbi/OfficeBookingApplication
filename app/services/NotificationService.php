@@ -51,11 +51,11 @@ class NotificationService
     }
 
     /**
-     * Get unread notifications for a user
+     * Get all notifications for a user
      */
-    public function getUnreadNotifications($userId = null)
+    public function getAllNotifications($userId = null)
     {
         $userId = $userId ?? Auth::id();
-        return Notification::where('user_id', $userId)->where('is_read', false)->latest()->get();
+        return Notification::where('user_id', $userId)->latest()->get();
     }
 }

@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\UserInviteMail;
 use App\Models\Invite;
+use Exception;
 use Illuminate\Http\Request;
 use App\Services\InviteService;
+use Illuminate\Support\Facades\Mail;
 
 class InviteController extends Controller
 {
@@ -82,5 +85,30 @@ class InviteController extends Controller
 
         return redirect()->route('admin.invites.index')
             ->with('success', 'Invite deleted successfully.');
+    }
+    public function resend(Invite $invite)
+    {
+        try {
+
+            if ($invite->expires_at && now()->greaterThan($invite->expires_at)) {
+                return redirect()->back()->with('error', 'This invite has expired and cannot be resent.');
+            }
+
+            Mail::to($invite->email)->send(new UserInviteMail($invite->token));
+
+            return redirect()->back()->with('success', 'Invite resent successfully.');
+
+        } catch (\Swift_TransportException $ex) {
+
+            // This usually means SMTP/network is down
+            return redirect()->back()->with('error', 'Failed to send email due to network or mail server issues. Please try again.');
+
+        } catch (Exception $ex) {
+
+            // Optional: Log for debugging
+            \Log::error('Invite resend failed: ' . $ex->getMessage());
+
+            return redirect()->back()->with('error', 'Something went wrong while sending the email.');
+        }
     }
 }

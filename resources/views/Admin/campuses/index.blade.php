@@ -95,10 +95,7 @@
                             @endforeach
                             </tbody>
                         </table>
-                        {{-- Pagination links --}}
-{{--                        <div class="d-flex justify-content-end mt-3">--}}
-{{--                            {{ $campuses->withQueryString()->links() }}--}}
-{{--                        </div>--}}
+
                     </div>
                 @else
                     <div class="text-center py-4">

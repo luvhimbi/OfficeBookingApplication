@@ -4,6 +4,9 @@
 
 @section('content')
     <div class="container mt-4">
+        <a href="{{ route('admin.reports.bookings.export', request()->query()) }}" class="btn btn-success mb-3">
+            Export Report as PDF
+        </a>
 
         {{-- Booking Statistics --}}
         <div class="card border-0 shadow mb-4">
@@ -47,7 +50,6 @@
         <div class="card border-0 shadow mb-4">
             <div class="card-body">
                 <h4>Recent Bookings</h4>
-
                 <table class="table table-striped">
                     <thead>
                     <tr>
@@ -65,7 +67,10 @@
                     <tbody>
                     @foreach ($recentBookings as $b)
                         <tr>
-                            <td>{{ $b->user->firstname ?? 'N/A' }}</td>
+                            @php
+                              $full_name = ($b->user->firstname ?? 'N/A') . ' ' . ($b->user->lastname ?? 'N/A');
+                             @endphp;
+                            <td title="{{ $full_name }}">{{ Str::limit($full_name, 15) }}</td>
                             <td>{{ $b->date }}</td>
                             <td>{{ $b->start_time }}</td>
                             <td>{{ $b->end_time }}</td>
@@ -95,14 +100,6 @@
                 </div>
             </div>
 
-            <div class="col-md-6 mb-4">
-                <div class="card border-0 shadow">
-                    <div class="card-body">
-                        <h4>Peak Booking Hours</h4>
-                        <canvas id="peakHoursChart"></canvas>
-                    </div>
-                </div>
-            </div>
 
         </div>
 
@@ -131,7 +128,10 @@
                             <tbody>
                             @foreach ($userRanking as $u)
                                 <tr>
-                                    <td>{{ $u->user->firstname ?? 'User Deleted' }}</td>
+                                    @php
+                                        $full_name = ($u->user->firstname ?? 'N/A') . ' ' . ($u->user->lastname ?? 'N/A');
+                                    @endphp;
+                                    <td>{{$full_name}}</td>
                                     <td>{{ $u->total }}</td>
                                 </tr>
                             @endforeach
@@ -162,17 +162,17 @@
             }
         });
 
-        // Peak hours
-        new Chart(document.getElementById('peakHoursChart'), {
-            type: 'line',
-            data: {
-                labels: @json($peakHours->pluck('hour')),
-                datasets: [{
-                    label: 'Bookings',
-                    data: @json($peakHours->pluck('total'))
-                }]
-            }
-        });
+        {{--// Peak hours--}}
+        {{--new Chart(document.getElementById('peakHoursChart'), {--}}
+        {{--    type: 'line',--}}
+        {{--    data: {--}}
+        {{--        labels: @json($peakHours->pluck('hour')),--}}
+        {{--        datasets: [{--}}
+        {{--            label: 'Bookings',--}}
+        {{--            data: @json($peakHours->pluck('total'))--}}
+        {{--        }]--}}
+        {{--    }--}}
+        {{--});--}}
 
         // Monthly trends
         new Chart(document.getElementById('monthlyChart'), {

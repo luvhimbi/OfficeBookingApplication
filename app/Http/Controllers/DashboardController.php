@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FavoriteSpace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
@@ -57,23 +58,14 @@ class DashboardController extends Controller
             return $booking->status === 'cancelled';
         });
 
-        $favoriteSpaces = Booking::query()
-            ->select([
-                'campus_id',
-                'building_id',
-                'floor_id',
-                'space_type',
-                'space_id',
-                DB::raw('COUNT(*) as booked_count')
-            ])
+        $favoriteSpaces = FavoriteSpace::query()
             ->where('user_id', $user->id)
-            ->where('status', '!=', 'cancelled')
-            ->groupBy('campus_id', 'building_id', 'floor_id', 'space_type', 'space_id')
-            ->havingRaw('COUNT(*) >= 2')
+            ->where('booked_count', '>=', 2)
             ->orderByDesc('booked_count')
             ->limit(5)
             ->with(['campus', 'building', 'floor'])
             ->get();
+
 
 
         return view('employee.dashboard',

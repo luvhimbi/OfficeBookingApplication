@@ -43,7 +43,10 @@ Route::middleware('auth')->group(function () {
 
 });
 
-Route::middleware(['auth','two_factor','prevent-back-history'])->group(function () {
+Route::get('/invite/accept/{token}', [InviteController::class, 'accept'])->name('invite.accept');
+Route::post('/invite/complete/{token}', [InviteController::class, 'complete'])->name('invite.complete');
+
+Route::middleware(['auth','two_factor','prevent-back-history','track-user-activity'])->group(function () {
 
     Route::prefix('admin/reports')->name('admin.reports.')->group(function () {
 
@@ -58,9 +61,10 @@ Route::middleware(['auth','two_factor','prevent-back-history'])->group(function 
          Route::post('/admin/users/invite', [InviteController::class, 'store'])->name('admin.invites.store');
 
          // User sets password after clicking invite link
-         Route::get('/invite/accept/{token}', [InviteController::class, 'accept'])->name('invite.accept');
-         Route::post('/invite/complete/{token}', [InviteController::class, 'complete'])->name('invite.complete');
 
+
+    Route::post('/admin/invites/{invite}/resend', [InviteController::class, 'resend'])
+        ->name('admin.invites.resend');
 // Manage invites list
          Route::get('/admin/invites', [InviteController::class, 'index'])
              ->name('admin.invites.index');
@@ -92,6 +96,14 @@ Route::middleware(['auth','two_factor','prevent-back-history'])->group(function 
     // Desk Management Routes (Admin Only)
     Route::resource('desks', \App\Http\Controllers\DeskController::class)
         ->middleware(['auth']);
+    Route::get('admin/reports/users/export', [App\Http\Controllers\UserReportController::class, 'exportPDF'])
+        ->name('admin.reports.users.export');
+    Route::get('admin/reports/invites/export', [App\Http\Controllers\InviteReportController::class, 'exportPDF'])
+        ->name('admin.reports.invites.export');
+    Route::get('admin/reports/bookings/export', [App\Http\Controllers\BookingReportController::class, 'exportPDF'])
+        ->name('admin.reports.bookings.export');
+
+
 
     Route::get('/bookings/availability', [App\Http\Controllers\BookingController::class, 'availability']);
 

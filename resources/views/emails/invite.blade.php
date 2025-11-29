@@ -1,6 +1,6 @@
 <p>Hello,</p>
 
-<p>You have been invited to join WorkSpace Hub.</p>
+<p>You have been invited to join Flexi space.</p>
 
 <p>
     Click the link below to set your password:<br>

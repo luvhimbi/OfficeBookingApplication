@@ -82,5 +82,25 @@
             }
         </style>
     @endpush
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const form = document.querySelector('form[action="{{ route('password.email') }}"]');
+
+                form.addEventListener('submit', function(e) {
+                    // Show SweetAlert loading
+                    Swal.fire({
+                        title: 'Processing...',
+                        text: 'Please wait while we send your reset link.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading()
+                        }
+                    });
+                });
+            });
+        </script>
+    @endpush
+
 
 @endsection

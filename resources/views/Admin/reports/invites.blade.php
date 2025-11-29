@@ -4,6 +4,9 @@
 
 @section('content')
     <div class="container mt-4">
+        <a href="{{ route('admin.reports.invites.export', request()->query()) }}" class="btn btn-success mb-3">
+            Export Report as PDF
+        </a>
 
         <!-- Invite Statistics -->
         <div class="row mb-4">

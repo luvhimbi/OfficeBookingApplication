@@ -51,6 +51,7 @@
                 </div>
 
                 <div class="mb-3 form-check">
+                    <input type="hidden" name="is_active" value="0">
                     <input type="checkbox" name="is_active" id="is_active" class="form-check-input"
                            value="1" {{ old('is_active', $building->is_active) ? 'checked' : '' }}>
                     <label for="is_active" class="form-check-label">Active</label>

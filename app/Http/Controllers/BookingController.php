@@ -70,10 +70,13 @@ class BookingController extends Controller
 
     public function create()
     {
-        $campuses = Campus::orderBy('name')->get();
+        $campuses = Campus::where('is_active', true)
+            ->orderBy('name')
+            ->get();
 
         return view('employee.bookings.create', compact('campuses'));
     }
+
 
     /**
      * Get buildings for a specific campus (AJAX)

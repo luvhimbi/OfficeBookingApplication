@@ -12,7 +12,7 @@
                     <h3 class="fw-bold">
                         <i class="bi bi-box-arrow-in-right me-2 text-primary"></i>Login
                     </h3>
-                    <p class="text-muted small mb-0">Access your WorkSpace Hub account</p>
+                    <p class="text-muted small mb-0">Access Your Flexi Space account</p>
                 </div>
 
                 {{-- Success Message --}}

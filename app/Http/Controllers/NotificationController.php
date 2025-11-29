@@ -16,7 +16,7 @@ class NotificationController extends Controller
 
     public function index()
     {
-        $notifications = $this->notificationService->getUnreadNotifications();
+        $notifications = $this->notificationService->getAllNotifications();
         return view('notifications.index', compact('notifications'));
     }
 

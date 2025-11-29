@@ -69,10 +69,13 @@
                                     <td class="d-flex gap-2">
 
                                         @if(!$invite->used && (!$invite->expires_at || now()->lt($invite->expires_at)))
-                                            <a href="{{ route('admin.invites.create') }}?email={{ $invite->email }}"
-                                               class="btn btn-sm btn-outline-dark rounded-pill">
-                                                <i class="bi bi-arrow-repeat"></i> Resend
-                                            </a>
+                                            <form action="{{ route('admin.invites.resend', $invite->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-dark rounded-pill">
+                                                    <i class="bi bi-arrow-repeat"></i> Resend
+                                                </button>
+                                            </form>
+
                                         @endif
 
                                         <form id="delete-invite-{{ $invite->id }}"
@@ -112,4 +115,24 @@
             transition: 0.3s;
         }
     </style>
+
+    <script>
+        function confirmDelete(formId) {
+            Swal.fire({
+                title: 'Delete Invite?',
+                text: 'This action cannot be undone.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(formId).submit();
+                }
+            });
+        }
+    </script>
 @endsection

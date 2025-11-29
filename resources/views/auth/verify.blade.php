@@ -96,40 +96,5 @@
         </script>
     @endpush
 
-    @push('styles')
-        <style>
-            body {
-                background-color: #f8f9fa;
-            }
 
-            .card {
-                border-radius: 1rem;
-            }
-
-            .form-control:focus {
-                border-color: #4e73df;
-                box-shadow: 0 0 0 0.15rem rgba(78, 115, 223, 0.25);
-            }
-
-            .btn-primary {
-                background-color: #4e73df;
-                border-color: #4e73df;
-            }
-
-            .btn-primary:hover {
-                background-color: #395dc5;
-                border-color: #395dc5;
-            }
-
-            .btn-link {
-                font-weight: 500;
-                text-decoration: underline;
-                cursor: pointer;
-            }
-
-            .fs-5 {
-                letter-spacing: 0.3rem;
-            }
-        </style>
-    @endpush
 @endsection

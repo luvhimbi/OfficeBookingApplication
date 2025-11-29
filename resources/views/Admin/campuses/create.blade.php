@@ -44,10 +44,15 @@
                         @enderror
                     </div>
 
+                    <input type="hidden" name="is_active" value="0">
+
                     <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1" {{ old('is_active', '1') == '1' ? 'checked' : '' }}>
+                        <input type="hidden" name="is_active" value="0">
+                        <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1"
+                            {{ old('is_active', $item->is_active ?? 1) == '1' ? 'checked' : '' }}>
                         <label class="form-check-label" for="is_active">Active</label>
                     </div>
+
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                         <button type="submit" class="btn btn-primary">

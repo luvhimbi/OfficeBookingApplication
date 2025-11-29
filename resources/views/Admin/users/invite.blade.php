@@ -28,18 +28,18 @@
 
                             <div class="mb-3">
                                 <label class="fw-semibold text-black">Email</label>
-                                <input type="email" name="email" class="form-control rounded-pill" required>
+                                <input type="email" name="email" placeholder="your@example.com"  class="form-control rounded-pill" required>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="fw-semibold text-black">Firstname</label>
-                                    <input type="text" name="firstname" class="form-control rounded-pill" required>
+                                    <input type="text" name="firstname" placeholder="enter your firstname" class="form-control rounded-pill" required>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
                                     <label class="fw-semibold text-black">Lastname</label>
-                                    <input type="text" name="lastname" class="form-control rounded-pill" required>
+                                    <input type="text" name="lastname"  placeholder="enter your lastname"  class="form-control rounded-pill" required>
                                 </div>
                             </div>
 

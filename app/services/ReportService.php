@@ -33,7 +33,7 @@ class ReportService
         $totalUsers = User::count();
         $admins = User::where('role', 'admin')->count();
         $employees = User::where('role', 'employee')->count();
-        $activeToday = User::whereDate('created_at', now()->toDateString())->count();
+        $activeToday = User::whereDate('last_active_at', now()->toDateString())->count();
 
         // Chart: users joined per day last 7 days
         $chartLabels = [];
@@ -150,16 +150,7 @@ class ReportService
             ->orderByDesc('total')
             ->get();
 
-        // Peak hours (Postgres)
-        $peakHours = Booking::selectRaw('EXTRACT(HOUR FROM start_time) AS hour, COUNT(*) AS total')
-            ->groupByRaw('EXTRACT(HOUR FROM start_time)')
-            ->orderByRaw('hour')
-            ->get()
-            ->map(function ($row) {
-                // ensure hour is integer for frontend charts
-                $row->hour = (int) $row->hour;
-                return $row;
-            });
+
 
         // Monthly trends (year-month, last 12 months)
         $monthlyTrends = Booking::selectRaw("
@@ -201,7 +192,6 @@ class ReportService
             'chartData',
             'topCampuses',
             'topSpaceTypes',
-            'peakHours',
             'monthlyTrends',
             'userRanking'
         );

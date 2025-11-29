@@ -40,7 +40,7 @@ class CampusController extends Controller
             'name' => 'required|string|max:255|unique:campuses',
             'address' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
-            'is_active' => 'boolean',
+            'is_active' => 'required|boolean',
         ]);
 
         $this->campusService->create($validated);

@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
      $middleware->appendToGroup(
          'prevent-back-history',[\App\Http\Middleware\PreventBackHistory::class]
      );
+        $middleware->appendToGroup(
+            'track-user-activity',[\App\Http\Middleware\TrackUserActivity::class]
+        );
+
 
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -86,7 +86,7 @@ class AuthController extends Controller
         $enabled = $this->authService->toggleTwoFactor($user);
 
         $this->notificationService->createNotification(
-            $user->id,"Two factoer authentication status changed.",
+            $user->id,"Two factor authentication status changed.",
             $enabled ? 'Two-Factor Authentication enabled.' : 'Two-Factor Authentication disabled.'
         );
 
