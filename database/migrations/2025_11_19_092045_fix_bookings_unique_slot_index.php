@@ -27,7 +27,7 @@ return new class extends Migration
 
         DB::statement("
             CREATE UNIQUE INDEX bookings_unique_slot
-            ON bookings (space_type, space_id, start_time, end_time)
+            ON bookings (space_type, space_id,date, start_time, end_time)
             WHERE status != 'cancelled'
         ");
     }
